@@ -1,0 +1,25 @@
+[user]
+    name = Pedro Chambino
+    email = pchambino@gmail.com
+[core]
+    editor = vim
+    pager = less -FX
+    whitespace = trailing-space,space-before-tab,tab-in-indent
+    excludesfile = ~/.gitignore_global
+[color]
+    ui = auto
+[alias]
+    st = status -sb
+    di = diff
+    dc = diff --cached
+    co = checkout
+    ci = commit -v
+    br = branch
+    sta = stash
+    gla = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
+    gl = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
+    info = remote show origin
+[merge]
+    stat = false
+[push]
+    default = simple

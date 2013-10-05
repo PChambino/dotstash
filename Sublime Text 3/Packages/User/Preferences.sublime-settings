@@ -1,7 +1,7 @@
 {
 	"caret_style": "phase",
 	"close_windows_when_empty": true,
-	"color_scheme": "Packages/Monokai Extended/Monokai Extended.tmTheme",
+	"color_scheme": "Packages/User/Monokai Soda.tmTheme",
 	"detect_slow_plugins": false,
 	"draw_minimap_border": true,
 	"ensure_newline_at_eof_on_save": true,
@@ -47,9 +47,7 @@
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
-		"WordCount",
-		"Vintage",
-		"Simple Rails Navigator"
+		"Vintage"
 	],
 	"indent_guide_options":
 	[

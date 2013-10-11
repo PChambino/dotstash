@@ -15,6 +15,6 @@ if which rbenv > /dev/null
   set PATH ~/.rbenv/shims $PATH
   rbenv rehash > /dev/null ^&1
   function b
-      bundle exec $argv
+    bundle exec $argv
   end
 end

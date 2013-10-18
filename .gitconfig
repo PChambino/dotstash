@@ -15,11 +15,13 @@
     co = checkout
     ci = commit -v
     br = branch
+    ff = merge --ff-only
     sta = stash
     gla = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
     gl = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
     info = remote show origin
 [merge]
     stat = false
+    defaultToUpstream = true
 [push]
     default = simple

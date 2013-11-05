@@ -2,7 +2,7 @@
 set fish_greeting
 
 # /usr/local/bin to top of the PATH
-set PATH /usr/local/bin $PATH
+pushto PATH /usr/local/bin
 
 # setup z
 begin
@@ -12,11 +12,19 @@ end
 
 # setup rbenv
 if which rbenv > /dev/null
-  set PATH ~/.rbenv/shims $PATH
+  pushto PATH ~/.rbenv/shims
   rbenv rehash > /dev/null ^&1
   function b
     bundle exec $argv
   end
+end
+
+# PATH for OS X
+if test (uname) = 'Darwin' -a (cat /etc/launchd.conf) != (echo setenv PATH (joins : $PATH))
+  set_color -o red
+  echo "Update your /etc/launchd.conf to:"
+  echo setenv PATH (joins : $PATH)
+  set_color normal
 end
 
 # fish git prompt

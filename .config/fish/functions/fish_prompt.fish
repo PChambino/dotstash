@@ -1,8 +1,6 @@
 function fish_prompt
 
-  if functions -q z
-    z --add "$PWD"
-  end
+  functions -q z; and z --add "$PWD"
 
   set -l cyan (set_color -o cyan)
   set -l red (set_color -o red)

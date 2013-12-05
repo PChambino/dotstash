@@ -18,6 +18,7 @@
     co = checkout
     ci = commit -v
     br = branch
+    f = fetch
     ff = merge --ff-only
     fff = pull --ff-only
     sta = stash

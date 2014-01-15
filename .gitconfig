@@ -24,6 +24,7 @@
     sta = stash
     gla = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
     gl = log --graph --decorate --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
+    review = log -p --reverse -M -C -C --patience --no-prefix
     info = remote show origin
 
 [push]

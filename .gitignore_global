@@ -5,3 +5,4 @@ nbproject
 nbactions.xml
 .dep.inc
 tmp
+.scons*

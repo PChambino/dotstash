@@ -37,7 +37,8 @@
 		"*.lot",
 		"*.lol",
 		"*.bbl",
-		"*.blg"
+		"*.blg",
+		"*.sconsign.dblite"
 	],
 	"font_options":
 	[

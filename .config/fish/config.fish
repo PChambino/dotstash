@@ -13,6 +13,7 @@ end
 # setup rbenv
 if which rbenv > /dev/null
   pushto PATH ~/.rbenv/shims
+  pushto PATH ./bin # for project-specific Bundler binstubs
   rbenv rehash > /dev/null ^&1
   function b
     bundle exec $argv

@@ -5,6 +5,17 @@
 	"detect_slow_plugins": false,
 	"draw_minimap_border": true,
 	"ensure_newline_at_eof_on_save": true,
+	"folder_exclude_patterns":
+	[
+		".svn",
+		".git",
+		".hg",
+		"CVS",
+		".vagrant",
+		".bundle",
+		"log",
+		"tmp"
+	],
 	"file_exclude_patterns":
 	[
 		"*.pyc",

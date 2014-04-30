@@ -33,6 +33,7 @@
 [merge]
     stat = false
     defaultToUpstream = true
+    ff = false
 
 [rerere]
     enable = true

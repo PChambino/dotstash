@@ -52,3 +52,7 @@ set __fish_git_prompt_char_upstream_equal    ''
 set __fish_git_prompt_char_upstream_behind   '↓'
 set __fish_git_prompt_char_upstream_ahead    '↑'
 set __fish_git_prompt_char_upstream_diverged '<>'
+
+# aliases
+alias g=git
+

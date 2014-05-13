@@ -6,3 +6,4 @@ nbactions.xml
 .dep.inc
 tmp
 .scons*
+.*.swp

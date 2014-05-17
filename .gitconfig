@@ -23,6 +23,7 @@
     fff = pull --ff-only
     sta = stash
     gla = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
+    glb = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --first-parent
     gl = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
     me = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges --since='6am'
     review = log -p --reverse -M -C -C --patience --no-prefix

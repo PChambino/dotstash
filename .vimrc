@@ -30,6 +30,8 @@ Plugin 'ervandew/supertab'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-endwise'
+Plugin 'kana/vim-textobj-user'
+Plugin 'kana/vim-textobj-indent'
 
 Plugin 'tpope/vim-fugitive'
 Plugin 'scrooloose/syntastic'
@@ -53,6 +55,9 @@ if has("mouse") | set mouse=a | endif
 syntax on
 set background=dark
 colorscheme solarized
+
+" force encoding to utf-8
+set encoding=utf-8
 
 " show me line numbers
 set number
@@ -154,6 +159,8 @@ inoremap jj <esc>
 " exits insert mode and write
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
+inoremap <c-s><c-s> <esc>:wall<cr>
+noremap <c-s><c-s> <esc>:wall<cr>
 
 " intuitive movement over wrapped lines
 nnoremap k gk
@@ -183,18 +190,17 @@ nnoremap <c-k> <c-w>k
 nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 " resize windows with the arrow keys
-noremap <up>    <c-w>-
-noremap <down>  <c-w>+
-noremap <left>  3<c-w>>
-noremap <right> 3<c-w><
-" resize splits when the window is resized
-au! VimResized * :wincmd =
+noremap <up>    <c-w>+
+noremap <down>  <c-w>-
+noremap <left>  3<c-w><
+noremap <right> 3<c-w>>
 
 " move between buffers quickly
 noremap <c-z> :bp<cr>
 noremap <c-x> :bn<cr>
 " kill window
 nnoremap Q :q<cr>
+nnoremap QQ :qa<cr>
 " delete buffer
 nnoremap K :bd<cr>
 " man
@@ -251,23 +257,6 @@ if executable('ag')
   let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
   let g:unite_source_grep_recursive_opt = ''
 endif
-
-" custom mappings for the unite buffer
-autocmd FileType unite call s:unite_settings()
-function! s:unite_settings()
-  imap <buffer> <c-j> <Plug>(unite_select_next_line)
-  imap <buffer> <tab> <Plug>(unite_select_next_line)
-  imap <buffer> <c-k> <Plug>(unite_select_previous_line)
-  imap <buffer> <s-tab> <Plug>(unite_select_previous_line)
-  imap <buffer> <c-a> <Plug>(unite_choose_action)
-
-  imap <silent><buffer><expr> <C-s> unite#do_action('split')
-  imap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
-  imap <silent><buffer><expr> <C-t> unite#do_action('tabopen')
-
-  imap <buffer> <esc> <Plug>(unite_exit)
-  nmap <buffer> <esc> <Plug>(unite_exit)
-endfunction
 
 " the prefix key
 nnoremap [unite] <Nop>

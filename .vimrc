@@ -90,9 +90,8 @@ set showmatch
 " lets get wild with tab completion
 set wildmenu wildmode=longest,list
 
-" fold at indent, helps selection
-set foldmethod=indent
-" but have folds open by default
+" enable folding, but have folds open by default
+set foldmethod=syntax
 set foldlevelstart=99
 
 " split to right and below

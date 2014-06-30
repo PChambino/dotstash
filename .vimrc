@@ -250,6 +250,9 @@ noremap <leader>ga :Gwrite<cr>
 " gundo
 noremap <leader>u :GundoToggle<cr>
 
+" explorer
+noremap <leader>f :VimFilerExplorer<cr>
+
 " unite options
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#filters#sorter_default#use(['sorter_rank'])

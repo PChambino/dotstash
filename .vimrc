@@ -37,6 +37,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'scrooloose/syntastic'
 
 Plugin 'vim-ruby/vim-ruby'
+Plugin 'saltstack/salt-vim'
 
 call vundle#end()
 filetype plugin indent on    " required

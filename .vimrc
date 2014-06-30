@@ -91,6 +91,9 @@ set showmatch
 " lets get wild with tab completion
 set wildmenu wildmode=longest,list
 
+" don't scan included files when looking for completions
+set complete-=i
+
 " enable folding, but have folds open by default
 set foldmethod=syntax
 set foldlevelstart=99

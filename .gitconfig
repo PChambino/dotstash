@@ -12,6 +12,8 @@
     ui = always
 
 [alias]
+    aa = add -N
+    ap = add -p
     st = status -sb
     di = diff
     dc = diff --cached

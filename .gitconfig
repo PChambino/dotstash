@@ -12,23 +12,27 @@
     ui = always
 
 [alias]
-    aa = add -N
-    ap = add -p
-    st = status -sb
-    di = diff
+    s = status -sb
+    aa = add
+    a = add -N
+    p = add -p
+    d = diff
     dc = diff --cached
     co = checkout
+    cb = checkout -b
     ci = commit -v
-    br = branch
+    b = branch
+    ba = branch -a
     f = fetch
     ff = merge --ff-only
     fff = pull --ff-only
     sta = stash
-    gla = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
-    glb = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --first-parent
-    gl = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
-    me = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges --since='6am'
-    review = log -p --reverse -M -C -C --patience --no-prefix
+    l = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
+    la = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
+    lb = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --first-parent
+    me = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges
+    today = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges --since='6am'
+    r = log -p --reverse -M -C -C --patience --no-prefix
     info = remote show origin
 
 [push]

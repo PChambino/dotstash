@@ -21,6 +21,7 @@
     co = checkout
     cb = checkout -b
     ci = commit -v
+    ca = commit -v --amend
     b = branch
     ba = branch -a
     f = fetch

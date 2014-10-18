@@ -39,6 +39,7 @@ Plugin 'scrooloose/syntastic'
 Plugin 'vim-ruby/vim-ruby'
 Plugin 'saltstack/salt-vim'
 Plugin 'mustache/vim-mustache-handlebars'
+Plugin 'derekwyatt/vim-scala'
 
 call vundle#end()
 filetype plugin indent on    " required

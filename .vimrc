@@ -164,8 +164,6 @@ inoremap jj <esc>
 " exits insert mode and write
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
-inoremap <c-s><c-s> <esc>:wall<cr>
-noremap <c-s><c-s> <esc>:wall<cr>
 
 " intuitive movement over wrapped lines
 nnoremap k gk
@@ -201,15 +199,14 @@ noremap <left>  3<c-w><
 noremap <right> 3<c-w>>
 
 " move between buffers quickly
-noremap <c-z> :bp<cr>
+noremap <c-a> :bp<cr>
 noremap <c-x> :bn<cr>
-" kill window
-nnoremap Q :q<cr>
-nnoremap QQ :qa<cr>
 " delete buffer
 nnoremap K :bd<cr>
-" man
-nnoremap M K
+" close window
+nnoremap <c-q> :close<cr>
+" save session and quit vim
+nnoremap Q :mks!<cr>:qa<cr>
 
 " HERESY
 inoremap <c-a> <esc>I
@@ -284,4 +281,3 @@ nnoremap [unite]r :Unite -no-split buffer tab file_mru directory_mru<cr>
 nnoremap [unite]b :Unite -no-split buffer<cr>
 " yank history
 nnoremap [unite]y :Unite -no-split history/yank<cr>
-

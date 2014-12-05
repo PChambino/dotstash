@@ -270,8 +270,7 @@ nmap <space> [unite]
 " general purpose
 nnoremap [unite]<space> :Unite -no-split -start-insert source<cr>
 " files
-nnoremap [unite]f :Unite -no-split -start-insert file_rec/async<cr>
-nnoremap [unite]s :Unite -no-split -start-insert file_rec/async:src<cr>
+nnoremap [unite]f :Unite -no-split -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>
 " grepping
 nnoremap [unite]g :Unite -no-split grep:.<cr>
 " content

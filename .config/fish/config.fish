@@ -55,4 +55,3 @@ set __fish_git_prompt_char_upstream_diverged '<>'
 
 # aliases
 alias g=git
-

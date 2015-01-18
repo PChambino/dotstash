@@ -65,6 +65,7 @@ set encoding=utf-8
 
 " show me line numbers
 set number
+set relativenumber
 " highlight current line
 set cursorline
 " enforce the 80 character rule

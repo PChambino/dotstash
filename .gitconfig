@@ -33,6 +33,7 @@
     l = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order
     la = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --all
     lb = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(blue)%an %C(red)%d%C(reset) %s' --date=relative --date-order --first-parent
+    ld = log --oneline --left-right
     me = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges
     today = log --graph --pretty=format:'%C(yellow)%h %C(green)%ad %C(reset) %s' --date=relative --date-order --all --author='Pedro Chambino' --no-merges --since='6am'
     r = log -p --reverse -M -C -C --patience --no-prefix

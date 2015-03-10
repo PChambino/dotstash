@@ -12,12 +12,26 @@ end
 
 # setup rbenv
 if which rbenv > /dev/null
+  # rbenv init -
   pushto PATH ~/.rbenv/shims
-  pushto PATH ./bin # for project-specific Bundler binstubs
-  rbenv rehash > /dev/null ^&1
-  function b
-    bundle exec $argv
+  setenv RBENV_SHELL fish
+  . /usr/local/Cellar/rbenv/HEAD/completions/rbenv.fish
+  rbenv rehash 2>/dev/null
+  function rbenv
+    set command $argv[1]
+    set -e argv[1]
+
+    switch "$command"
+    case rehash shell
+      eval (rbenv "sh-$command" $argv)
+    case '*'
+      command rbenv "$command" $argv
+    end
   end
+
+  # Bundler
+  pushto PATH ./bin # for project-specific binstubs
+  alias b='bundle exec'
 end
 
 # PATH for OS X

@@ -111,6 +111,9 @@ set incsearch hlsearch
 " make searches case-sensitive only if they contain upper-case characters
 set ignorecase smartcase
 
+" tags file
+set tags=.tags
+
 " hide buffers when closing windows
 set hidden
 
@@ -277,7 +280,7 @@ nnoremap [unite]g :Unite -no-split grep:.<cr>
 " content
 nnoremap [unite]o :Unite -no-split -start-insert -auto-preview outline<cr>
 nnoremap [unite]l :Unite -no-split -start-insert line<cr>
-nnoremap [unite]t :!ctags -R<cr>:Unite -no-split -auto-preview -start-insert -input=<c-r><c-w> tag<cr>
+nnoremap [unite]t :!ctags -Rf .tags<cr>:Unite -no-split -auto-preview -start-insert -input=<c-r><c-w> tag<cr>
 " quickly switch between recent things
 nnoremap [unite]r :Unite -no-split buffer tab file_mru directory_mru<cr>
 nnoremap [unite]b :Unite -no-split buffer<cr>

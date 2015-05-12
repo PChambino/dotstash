@@ -13,6 +13,7 @@
 
 [alias]
     s = status -sb
+    conflicts = !git diff --name-only --diff-filter=U | xargs git s
     aa = add
     a = add -N
     p = add -p

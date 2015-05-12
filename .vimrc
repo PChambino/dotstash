@@ -68,8 +68,8 @@ set number
 set relativenumber
 " highlight current line
 set cursorline
-" enforce the 80 character rule
-set textwidth=79 colorcolumn=+1
+" show 80 character rule
+set colorcolumn=80
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start

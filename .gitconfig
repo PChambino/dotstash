@@ -27,6 +27,8 @@
     squash = commit -v --squash
     b = branch
     ba = branch -a
+    bm = !git branch --no-color --merged | egrep -v '^\\* ' | grep -v master
+    bn = branch --no-color --no-merged
     f = fetch
     ff = merge --ff-only
     fff = pull --ff-only

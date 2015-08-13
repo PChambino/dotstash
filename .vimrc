@@ -40,6 +40,7 @@ Plugin 'vim-ruby/vim-ruby'
 Plugin 'saltstack/salt-vim'
 Plugin 'mustache/vim-mustache-handlebars'
 Plugin 'derekwyatt/vim-scala'
+Plugin 'derekwyatt/vim-sbt'
 Plugin 'elixir-lang/vim-elixir'
 
 call vundle#end()

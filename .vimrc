@@ -138,7 +138,7 @@ set noswapfile
 " default indentation
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab autoindent
 " indent per file type preferences
-au! FileType ruby,eruby,yaml,json setlocal ts=2 sts=2 sw=2 et ai
+au! FileType ruby,eruby,yaml,json,javascript setlocal ts=2 sts=2 sw=2 et ai
 
 " bash like keys for command line
 cnoremap <c-a> <home>

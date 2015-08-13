@@ -42,6 +42,7 @@ Plugin 'mustache/vim-mustache-handlebars'
 Plugin 'derekwyatt/vim-scala'
 Plugin 'derekwyatt/vim-sbt'
 Plugin 'elixir-lang/vim-elixir'
+Plugin 'rust-lang/rust.vim'
 
 call vundle#end()
 filetype plugin indent on    " required

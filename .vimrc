@@ -43,6 +43,7 @@ Plugin 'derekwyatt/vim-scala'
 Plugin 'derekwyatt/vim-sbt'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'rust-lang/rust.vim'
+Plugin 'suan/vim-instant-markdown'
 
 call vundle#end()
 filetype plugin indent on    " required
@@ -50,6 +51,8 @@ filetype plugin indent on    " required
 let g:airline#extensions#tabline#enabled = 1
 let g:indent_guides_enable_on_vim_startup = 1
 let g:vimfiler_as_default_explorer = 1
+let g:instant_markdown_slow = 1
+let g:instant_markdown_autostart = 0
 
 " teach vim how to fish
 if $SHELL =~ "fish" | set shell=/bin/bash | endif

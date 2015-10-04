@@ -48,6 +48,10 @@ Plugin 'suan/vim-instant-markdown'
 call vundle#end()
 filetype plugin indent on    " required
 
+" reset my autocmd group, useful for reloading config
+aug my
+au!
+
 let g:airline#extensions#tabline#enabled = 1
 let g:indent_guides_enable_on_vim_startup = 1
 let g:vimfiler_as_default_explorer = 1
@@ -138,7 +142,7 @@ set noswapfile
 " default indentation
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab autoindent
 " indent per file type preferences
-au! FileType ruby,eruby,yaml,json,javascript setlocal ts=2 sts=2 sw=2 et ai
+au FileType ruby,eruby,yaml,json,javascript setlocal ts=2 sts=2 sw=2 et ai
 
 " bash like keys for command line
 cnoremap <c-a> <home>

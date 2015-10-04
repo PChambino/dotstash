@@ -53,10 +53,15 @@ aug my
 au!
 
 let g:airline#extensions#tabline#enabled = 1
-let g:indent_guides_enable_on_vim_startup = 1
 let g:vimfiler_as_default_explorer = 1
 let g:instant_markdown_slow = 1
 let g:instant_markdown_autostart = 0
+
+" indent guides
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+au VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=0
+au VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=NONE
 
 " teach vim how to fish
 if $SHELL =~ "fish" | set shell=/bin/bash | endif

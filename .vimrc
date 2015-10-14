@@ -25,9 +25,9 @@ Plugin 'h1mesuke/unite-outline'
 
 Plugin 'sjl/gundo.vim'
 
-Plugin 'vim-scripts/tComment'
+Plugin 'vim-scripts/tComment' " gc gcc
 Plugin 'ervandew/supertab'
-Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-surround' " ys cs ds S
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-endwise'
 Plugin 'kana/vim-textobj-user'

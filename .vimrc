@@ -32,6 +32,8 @@ Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-endwise'
 Plugin 'kana/vim-textobj-user'
 Plugin 'kana/vim-textobj-indent'
+Plugin 'tommcdo/vim-lion' " gl gL
+Plugin 'AndrewRadev/splitjoin.vim' " gS gJ
 
 Plugin 'tpope/vim-fugitive'
 Plugin 'scrooloose/syntastic'

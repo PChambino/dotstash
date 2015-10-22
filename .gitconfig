@@ -17,8 +17,8 @@
     aa = add
     a = add -N
     p = add -p
-    d = diff
-    dc = diff --cached
+    d = diff --patience -M -C -C --no-prefix
+    dc = !git d --cached
     co = checkout
     cb = checkout -b
     ci = commit -v
@@ -38,7 +38,7 @@
     ld = log --oneline --left-right
     me = !git l --author='Pedro Chambino' --no-merges
     today = !git me --since='6am'
-    r = log -p --reverse -M -C -C --patience --no-prefix
+    r = log -p --reverse --patience -M -C -C --no-prefix
     info = remote show origin
 
 [push]

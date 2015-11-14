@@ -186,10 +186,6 @@ inoremap jj <esc>
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
 
-" intuitive movement over wrapped lines
-nnoremap k gk
-nnoremap j gj
-
 " no arrow keys
 inoremap <up> <nop>
 inoremap <down> <nop>

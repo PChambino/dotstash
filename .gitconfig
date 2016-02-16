@@ -34,7 +34,7 @@
     ff = merge --ff-only
     fff = pull --ff-only
     sta = stash
-    l = log --pretty=format:'%C(yellow)%h %C(reset)%s%C(red)%d %C(blue)%an %C(green)%ar' --topo-order
+    l = log --pretty=format:'%C(yellow)%h %C(reset)%s%C(red)%d %C(blue)%an %C(green)%ad %ar' --topo-order --date=short
     lb = !git l --first-parent
     ld = log --oneline --left-right
     me = !git l --author='Pedro Chambino' --no-merges

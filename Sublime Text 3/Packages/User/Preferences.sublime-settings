@@ -59,7 +59,10 @@
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[
-		"Vintage"
+		"Haxe",
+		"HTML5",
+		"SublimeLinter",
+		"SublimeLinter-flake8"
 	],
 	"indent_guide_options":
 	[

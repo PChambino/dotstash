@@ -19,6 +19,7 @@
     p = add -p
     d = diff --patience -M -C -C --no-prefix
     dc = !git d --cached
+    ds = !git d --stat
     co = checkout
     cb = checkout -b
     ci = commit -v

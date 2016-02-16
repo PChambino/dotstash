@@ -295,6 +295,6 @@ nnoremap [unite]l :Unite -no-split -start-insert line<cr>
 nnoremap [unite]t :!ctags -Rf .tags<cr>:Unite -no-split -auto-preview -start-insert -input=<c-r><c-w> tag<cr>
 " quickly switch between recent things
 nnoremap [unite]r :Unite -no-split buffer tab file_mru directory_mru<cr>
-nnoremap [unite]b :Unite -no-split buffer<cr>
+nnoremap [unite]b :Unite -no-split -start-insert -auto-preview buffer<cr>
 " yank history
 nnoremap [unite]y :Unite -no-split history/yank<cr>

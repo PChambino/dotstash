@@ -1,9 +1,6 @@
 # clear greeting message
 set fish_greeting
 
-# /usr/local/bin to top of the PATH
-pushto PATH /usr/local/bin
-
 # setup z
 begin
   set -l Z ~/.config/fish/z.fish

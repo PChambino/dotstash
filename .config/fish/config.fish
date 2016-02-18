@@ -1,12 +1,6 @@
 # clear greeting message
 set fish_greeting
 
-# setup z
-begin
-  set -l Z ~/.config/fish/z.fish
-  test -e $Z; and . $Z
-end
-
 # setup rbenv
 if which rbenv > /dev/null
   # rbenv init -

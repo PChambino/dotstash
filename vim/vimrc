@@ -1,0 +1,74 @@
+call plug#begin()
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-rsi' " readline/emacs style insertion
+Plug 'tpope/vim-eunuch' " UNIX helpers :Mkdir :Rename
+Plug 'tpope/vim-unimpaired' " ]b [b
+Plug 'tpope/vim-commentary' " gc gcc
+Plug 'tpope/vim-surround' " ys cs ds S
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-endwise' " auto close statements
+Plug 'tpope/vim-fugitive' " git helpers
+
+" Plug 'kana/vim-textobj-user'
+" Plug 'kana/vim-textobj-indent'
+" Plug 'tommcdo/vim-lion' " gl gL
+" Plug 'AndrewRadev/splitjoin.vim' " gS gJ
+
+Plug 'sickill/vim-monokai'
+Plug 'bling/vim-airline'
+" Plug 'tpope/vim-flagship'
+" Plug 'itchyny/lightline.vim'
+Plug 'airblade/vim-gitgutter'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'shougo/vimfiler.vim'
+Plug 'shougo/vimproc.vim', { 'do': 'make' } | Plug 'shougo/unite.vim'
+
+Plug 'scrooloose/syntastic'
+Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+Plug 'derekwyatt/vim-scala', { 'for': 'scala' }
+Plug 'derekwyatt/vim-sbt', { 'for': 'sbt.scala' }
+" Plug 'saltstack/salt-vim'
+" Plug 'mustache/vim-mustache-handlebars'
+" Plug 'elixir-lang/vim-elixir'
+" Plug 'rust-lang/rust.vim'
+call plug#end()
+
+colorscheme monokai
+
+if has("mouse") | set mouse=a | endif
+
+set autowrite " write when switching buffers
+set colorcolumn=80
+set cursorline
+set foldlevelstart=99 " open folds by default
+set foldmethod=syntax
+set hlsearch
+set ignorecase smartcase " case-sensitive if search has upper-case characters
+set list listchars=tab:▸\ ,trail:·,nbsp:␣,extends:>,precedes:< showbreak=↪ 
+set nobackup
+set noswapfile
+set relativenumber
+set splitbelow
+set splitright
+set tags=.tags " use hidden tags file
+set undofile undodir=/tmp " persist undo history
+
+map <leader>R :source $MYVIMRC<cr><c-l>
+noremap <leader>E :tabedit $MYVIMRC<cr>
+
+inoremap <c-s> <esc>:w<cr>
+noremap <c-s> <esc>:w<cr>
+
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+call unite#filters#sorter_default#use(['sorter_rank'])
+nnoremap <leader><leader> :Unite -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>
+nnoremap <leader>b :Unite -start-insert buffer<cr>
+
+let g:airline#extensions#tabline#enabled = 1
+
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+au VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=NONE
+au VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=0
+
+let g:vimfiler_as_default_explorer = 1

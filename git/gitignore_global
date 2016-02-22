@@ -1,11 +1,7 @@
 .DS_Store
 *.sublime-*
 .svn
-nbproject
-nbactions.xml
-.dep.inc
 tmp
 .scons*
-.*.swp
 Session.vim
 .tags

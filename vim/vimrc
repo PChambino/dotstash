@@ -8,11 +8,8 @@ Plug 'tpope/vim-surround' " ys cs ds S
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-endwise' " auto close statements
 Plug 'tpope/vim-fugitive' " git helpers
-
-" Plug 'kana/vim-textobj-user'
-" Plug 'kana/vim-textobj-indent'
-" Plug 'tommcdo/vim-lion' " gl gL
-" Plug 'AndrewRadev/splitjoin.vim' " gS gJ
+Plug 'tommcdo/vim-lion' " alignment gl gL
+Plug 'AndrewRadev/splitjoin.vim' " gS gJ
 
 Plug 'sickill/vim-monokai'
 Plug 'bling/vim-airline'

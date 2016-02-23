@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 cd `dirname $0`
+. ../scripts/link_file.sh
+
 mkdir -p ~/.bundle
-ln -si `pwd`/bundle/config ~/.bundle
-ln -si `pwd`/rubocop.yml ~/.rubocop.yml
+link_file `pwd`/bundle/config ~/.bundle/config
+link_file `pwd`/rubocop.yml ~/.rubocop.yml

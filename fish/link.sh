@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 cd `dirname $0`
+. ../scripts/link_file.sh
+
 mkdir -p ~/.config/fish
-ln -si `pwd`/config.fish ~/.config/fish
-ln -si `pwd`/functions ~/.config/fish
+link_file `pwd`/config.fish ~/.config/fish/config.fish
+link_file `pwd`/functions ~/.config/fish/functions

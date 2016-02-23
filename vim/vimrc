@@ -17,8 +17,9 @@ Plug 'bling/vim-airline'
 " Plug 'itchyny/lightline.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'shougo/vimfiler.vim'
-Plug 'shougo/vimproc.vim', { 'do': 'make' } | Plug 'shougo/unite.vim'
+Plug 'shougo/vimfiler.vim' " requires unite
+Plug 'shougo/unite.vim' " requires vimproc for file_rec/git
+Plug 'shougo/vimproc.vim', { 'do': 'make' }
 
 Plug 'scrooloose/syntastic'
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }

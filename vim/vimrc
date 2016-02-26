@@ -1,5 +1,6 @@
 call plug#begin()
 Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-sleuth' " heuristically detected indent
 Plug 'tpope/vim-rsi' " readline/emacs style insertion
 Plug 'tpope/vim-eunuch' " UNIX helpers :Mkdir :Rename
 Plug 'tpope/vim-unimpaired' " ]b [b

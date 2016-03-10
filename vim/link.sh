@@ -3,6 +3,7 @@ set -e
 cd `dirname $0`
 . ../scripts/link_file.sh
 
-mkdir -p ~/.vim/autoload
-link_file `pwd`/plug.vim ~/.vim/autoload/plug.vim
+mkdir -p ~/.vim
+link_file `pwd`/autoload ~/.vim/autoload
+link_file `pwd`/ftplugin ~/.vim/ftplugin
 link_file `pwd`/vimrc ~/.vimrc

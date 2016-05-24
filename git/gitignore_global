@@ -5,3 +5,4 @@ tmp
 .scons*
 Session.vim
 .tags
+.gs

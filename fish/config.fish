@@ -1,30 +1,6 @@
 # clear greeting message
 set fish_greeting
 
-# setup rbenv
-if which rbenv > /dev/null
-  # rbenv init -
-  pushto PATH ~/.rbenv/shims
-  setenv RBENV_SHELL fish
-  . /usr/local/Cellar/rbenv/HEAD/completions/rbenv.fish
-  rbenv rehash 2>/dev/null
-  function rbenv
-    set command $argv[1]
-    set -e argv[1]
-
-    switch "$command"
-    case rehash shell
-      eval (rbenv "sh-$command" $argv)
-    case '*'
-      command rbenv "$command" $argv
-    end
-  end
-
-  # Bundler
-  pushto PATH ./bin # for project-specific binstubs
-  alias b='bundle exec'
-end
-
 # fish git prompt
 set __fish_git_prompt_showdirtystate        'yes'
 set __fish_git_prompt_showstashstate        'yes'

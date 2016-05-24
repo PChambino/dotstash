@@ -2,7 +2,7 @@
 set fish_greeting
 
 if which ry > /dev/null
-  pushto PATH /usr/local/lib/ry/current/bin
+  addtopath /usr/local/lib/ry/current/bin
 end
 
 # fish git prompt

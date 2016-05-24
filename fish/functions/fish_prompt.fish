@@ -2,6 +2,7 @@ function fish_prompt
   set -l cyan (set_color -o cyan)
   set -l red (set_color -o red)
   set -l blue (set_color -o blue)
+  set -l green (set_color -o green)
   set -l normal (set_color normal)
 
   set -l arrow "$red➜ "
@@ -12,5 +13,10 @@ function fish_prompt
     set git_info "$blue git:($git_info$blue)"
   end
 
-  echo -n -s $arrow $cwd $git_info $normal " "
+  set -l gs_info $GS_NAME
+  if test -n "$gs_info"
+    set gs_info "$green (gs)"
+  end
+
+  echo -n -s $arrow $cwd $git_info $gs_info $normal " "
 end

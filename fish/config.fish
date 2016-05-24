@@ -1,6 +1,10 @@
 # clear greeting message
 set fish_greeting
 
+if which ry > /dev/null
+  pushto PATH /usr/local/lib/ry/current/bin
+end
+
 # fish git prompt
 set __fish_git_prompt_showdirtystate        'yes'
 set __fish_git_prompt_showstashstate        'yes'

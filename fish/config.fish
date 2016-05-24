@@ -25,14 +25,6 @@ if which rbenv > /dev/null
   alias b='bundle exec'
 end
 
-# PATH for OS X
-# if test (uname) = 'Darwin' -a (cat /etc/launchd.conf) != (echo setenv PATH (joins : $PATH))
-#   set_color -o red
-#   echo "Update your /etc/launchd.conf to:"
-#   echo setenv PATH (joins : $PATH)
-#   set_color normal
-# end
-
 # fish git prompt
 set __fish_git_prompt_showdirtystate        'yes'
 set __fish_git_prompt_showstashstate        'yes'

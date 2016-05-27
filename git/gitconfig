@@ -2,6 +2,12 @@
     name = Pedro Chambino
     email = pchambino@gmail.com
 
+[commit]
+    gpgsign = true
+
+[gpg]
+    program = gpg2
+
 [core]
     editor = vim
     pager = less -FX

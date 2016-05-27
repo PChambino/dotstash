@@ -1,6 +1,8 @@
 # clear greeting message
 set fish_greeting
 
+set -xg GPG_TTY (tty)
+
 if which ry > /dev/null
   addtopath /usr/local/lib/ry/current/bin
 end

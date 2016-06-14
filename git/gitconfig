@@ -20,7 +20,7 @@
     aa = add
     a = add -N
     p = add -p
-    d = diff --patience -M -C -C --no-prefix
+    d = diff --patience -M -C -C --no-prefix --compaction-heuristic
     dc = !git d --cached
     ds = !git d --stat
     co = checkout

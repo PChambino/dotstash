@@ -1,6 +1,7 @@
 ctags
 fish
 git
+gnu-sed
 htop
 jq
 reattach-to-user-namespace

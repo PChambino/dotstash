@@ -44,7 +44,7 @@
     today = !git me --since='6am'
     r = log -p --reverse --patience -M -C -C --no-prefix
     info = remote show origin
-    hub = !git remote get-url origin | sed 's|^git@\\(.*\\):\\(.*\\).git$|https://\\1/\\2|'
+    hub = !git remote get-url origin | sed 's|^git@\\(.*\\):\\(.*\\).git$|https://\\1/\\2|' | xargs open
 
 [push]
     default = current

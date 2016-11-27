@@ -51,6 +51,7 @@ set splitbelow
 set splitright
 set tags=.tags " use hidden tags file
 set undofile undodir=/tmp " persist undo history
+set visualbell
 
 map <leader>R :source $MYVIMRC<cr><c-l>
 noremap <leader>E :tabedit $MYVIMRC<cr>

@@ -1,5 +1,5 @@
 call plug#begin()
-Plug 'tpope/vim-sensible'
+if !has('nvim') | Plug 'tpope/vim-sensible' | endif
 Plug 'tpope/vim-sleuth' " heuristically detected indent
 Plug 'tpope/vim-rsi' " readline/emacs style insertion
 Plug 'tpope/vim-eunuch' " UNIX helpers :Mkdir :Rename

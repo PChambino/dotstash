@@ -43,6 +43,7 @@ set foldlevelstart=99 " open folds by default
 set foldmethod=syntax
 set hlsearch
 set ignorecase smartcase " case-sensitive if search has upper-case characters
+set lazyredraw
 set list listchars=tab:▸\ ,trail:·,nbsp:␣,extends:>,precedes:< showbreak=↪ 
 set nobackup
 set noswapfile

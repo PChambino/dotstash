@@ -1,5 +1,8 @@
 call plug#begin()
-if !has('nvim') | Plug 'tpope/vim-sensible' | endif
+if !has('nvim')
+  Plug 'tpope/vim-sensible'
+  Plug 'tmux-plugins/vim-tmux-focus-events' " makes autoread work
+endif
 Plug 'tpope/vim-sleuth' " heuristically detected indent
 Plug 'tpope/vim-rsi' " readline/emacs style insertion
 Plug 'tpope/vim-eunuch' " UNIX helpers :Mkdir :Rename

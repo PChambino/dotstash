@@ -1,3 +1,5 @@
+Host *
+   UseKeychain yes
 Host localhost
    StrictHostKeyChecking no
    UserKnownHostsFile /dev/null

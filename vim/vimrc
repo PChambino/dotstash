@@ -67,7 +67,7 @@ inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
 
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
-call unite#filters#sorter_default#use(['sorter_rank'])
+call unite#filters#sorter_default#use(['sorter_selecta'])
 nnoremap <leader><leader> :Unite -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>
 nnoremap <leader>b :Unite -start-insert buffer<cr>
 

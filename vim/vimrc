@@ -34,6 +34,7 @@ Plug 'saltstack/salt-vim', { 'for': 'sls' }
 " Plug 'mustache/vim-mustache-handlebars'
 Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
 " Plug 'rust-lang/rust.vim'
+Plug 'ElmCast/elm-vim', { 'for': 'elm' }
 call plug#end()
 
 colorscheme monokai

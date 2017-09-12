@@ -32,7 +32,7 @@ Plug 'derekwyatt/vim-scala', { 'for': 'scala' }
 Plug 'derekwyatt/vim-sbt', { 'for': 'sbt.scala' }
 Plug 'saltstack/salt-vim', { 'for': 'sls' }
 " Plug 'mustache/vim-mustache-handlebars'
-" Plug 'elixir-lang/vim-elixir'
+Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
 " Plug 'rust-lang/rust.vim'
 call plug#end()
 

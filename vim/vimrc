@@ -24,6 +24,7 @@ Plug 'nathanaelkane/vim-indent-guides'
 Plug 'shougo/vimfiler.vim' " requires unite
 Plug 'shougo/unite.vim' " requires vimproc for file_rec/git
 Plug 'shougo/vimproc.vim', { 'do': 'make' }
+" Plug 'shougo/denite.nvim' " replaces unite, wait for it to mature
 Plug 'roxma/vim-tmux-clipboard'
 
 Plug 'scrooloose/syntastic'

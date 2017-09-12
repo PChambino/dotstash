@@ -4,6 +4,8 @@ git
 gnu-sed
 htop
 jq
+neovim
+python3
 reattach-to-user-namespace
 the_silver_searcher
 tmux

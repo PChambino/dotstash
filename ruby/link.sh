@@ -5,4 +5,3 @@ cd `dirname $0`
 
 mkdir -p ~/.bundle
 link_file `pwd`/bundle/config ~/.bundle/config
-link_file `pwd`/rubocop.yml ~/.rubocop.yml

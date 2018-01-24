@@ -26,6 +26,7 @@
     amend = commit -v --amend
     fixup = commit -v --fixup
     squash = commit -v --squash
+    pu = push -u
     b = branch
     ba = branch -a
     bm = !git branch --merged | egrep -v '^\\* ' | grep -v master

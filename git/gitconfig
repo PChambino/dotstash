@@ -22,6 +22,7 @@
     ds = !git d --stat
     co = checkout
     cb = checkout -b
+    cp = cherry-pick
     ci = commit -v
     amend = commit -v --amend
     fixup = commit -v --fixup

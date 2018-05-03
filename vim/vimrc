@@ -71,8 +71,8 @@ noremap <c-l> :noh<cr>
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
 
-map <space> \
-map <space><space> \\
+map <space> <leader>
+map <space><space> <leader><leader>
 
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#filters#sorter_default#use(['sorter_selecta'])

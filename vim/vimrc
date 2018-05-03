@@ -91,3 +91,4 @@ au VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=NONE
 au VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=0
 
 let g:vimfiler_as_default_explorer = 1
+autocmd FileType vimfiler nmap <buffer> \ <leader>

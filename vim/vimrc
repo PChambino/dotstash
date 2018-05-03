@@ -71,6 +71,9 @@ noremap <c-l> :noh<cr>
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
 
+map <space> \
+map <space><space> \\
+
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#filters#sorter_default#use(['sorter_selecta'])
 nnoremap <leader><leader> :Unite -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>

@@ -66,6 +66,7 @@ set visualbell
 noremap <leader>R :source $MYVIMRC<cr>
 noremap <leader>E :tabedit $MYVIMRC<cr>
 noremap <F6> :set invspell<cr>
+noremap <c-l> :noh<cr>
 
 inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>

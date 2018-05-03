@@ -78,7 +78,8 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#filters#sorter_default#use(['sorter_selecta'])
 nnoremap <leader><leader> :Unite -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>
 nnoremap <leader>b :Unite -start-insert buffer<cr>
-nnoremap <leader>g :Unite grep:.::<c-r><c-w><cr>
+nnoremap <leader>g :Unite grep:.::
+nnoremap <leader>gg :Unite grep:.::<c-r><c-w><cr>
 let g:unite_source_grep_command = 'rg'
 let g:unite_source_grep_recursive_opt = ''
 

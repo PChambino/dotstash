@@ -63,7 +63,7 @@ set tags=.tags " use hidden tags file
 set undofile undodir=/tmp " persist undo history
 set visualbell
 
-map <leader>R :source $MYVIMRC<cr><c-l>
+noremap <leader>R :source $MYVIMRC<cr>
 noremap <leader>E :tabedit $MYVIMRC<cr>
 noremap <F6> :set invspell<cr>
 

@@ -40,6 +40,7 @@ Plug 'venantius/vim-cljfmt', { 'for': 'clojure' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'tpope/vim-salve', { 'for': 'clojure' }
 Plug 'guns/vim-clojure-static', { 'for': 'clojure' }
+Plug 'dag/vim-fish', { 'for': 'fish' }
 call plug#end()
 
 colorscheme monokai

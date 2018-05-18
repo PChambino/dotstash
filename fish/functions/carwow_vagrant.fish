@@ -6,10 +6,17 @@ function carwow_vagrant
   end
 
   cd ~/vagrant
-  git pull --ff
+  git fetch
+  git log --oneline origin/master...
+  set -l should_provision (git log --oneline origin/master...)
+  git merge --ff-only
 
   if not vagrant status | grep -q running
-    vagrant up --provision
+    vagrant up
+  end
+
+  if test -n "$should_provision"
+    vagrant provision
   end
 
   if test -n "$vagrant_dir"

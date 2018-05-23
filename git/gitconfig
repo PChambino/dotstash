@@ -6,7 +6,7 @@
     gpgsign = true
 
 [core]
-    editor = vim
+    editor = nvim
     pager = less -FX
     whitespace = trailing-space,space-before-tab,tab-in-indent
     excludesfile = ~/.gitignore_global

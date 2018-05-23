@@ -22,9 +22,7 @@ Plug 'bling/vim-airline'
 " Plug 'itchyny/lightline.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'shougo/unite.vim' " requires vimproc for file_rec/git
-Plug 'shougo/vimproc.vim', { 'do': 'make' }
-" Plug 'shougo/denite.nvim' " replaces unite, wait for it to mature
+Plug 'shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'roxma/vim-tmux-clipboard'
 
 Plug 'scrooloose/syntastic'
@@ -75,14 +73,13 @@ noremap <c-s> <esc>:w<cr>
 map <space> <leader>
 map <space><space> <leader><leader>
 
-call unite#filters#matcher_default#use(['matcher_fuzzy'])
-call unite#filters#sorter_default#use(['sorter_selecta'])
-nnoremap <leader><leader> :Unite -start-insert file_rec/git:--cached:--others:--exclude-standard<cr>
-nnoremap <leader>b :Unite -start-insert buffer<cr>
-nnoremap <leader>g :Unite grep:.::
-nnoremap <leader>gg :Unite grep:.::<c-r><c-w><cr>
-let g:unite_source_grep_command = 'rg'
-let g:unite_source_grep_recursive_opt = ''
+nnoremap <leader><leader> :Denite file_rec<cr>
+nnoremap <leader>b :Denite buffer<cr>
+nnoremap <leader>g :Denite grep:. -mode=normal<cr>
+nnoremap <leader>8 :DeniteCursorWord grep:. -mode=normal<cr>
+nnoremap <leader>d :DeniteBufferDir file_rec<cr>
+nnoremap <leader>h :Denite help<cr>
+nnoremap <leader>r :Denite register<cr>
 
 let g:airline#extensions#tabline#enabled = 1
 

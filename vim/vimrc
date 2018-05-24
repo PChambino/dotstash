@@ -87,13 +87,24 @@ call denite#custom#map('insert', '<c-j>', '<denite:move_to_next_line>', 'noremap
 call denite#custom#map('insert', '<c-k>', '<denite:move_to_previous_line>', 'noremap')
 call denite#custom#map('insert', '<c-n>', '<denite:move_to_next_line>', 'noremap')
 call denite#custom#map('insert', '<c-p>', '<denite:move_to_previous_line>', 'noremap')
-call denite#custom#map('insert', '<c-l>', '<denite:toggle_select_down>', 'noremap')
+call denite#custom#map('insert', '<c-h>', '<denite:toggle_select_down>', 'noremap')
+
+call denite#custom#option('default', {
+        \ 'auto_resize': 'true',
+        \ 'highlight_mode_normal': 'Search',
+        \ 'prompt': '❯',
+        \ 'reversed': 'true',
+        \ 'vertical_preview': '1',
+        \ 'winheight': '10',
+        \ 'winminheight': '3',
+        \ })
 
 nnoremap <leader><leader> :Denite file_rec<cr>
 nnoremap <leader>b :Denite buffer<cr>
 nnoremap <leader>g :Denite grep:. -mode=normal<cr>
 nnoremap <leader>8 :DeniteCursorWord grep:. -mode=normal<cr>
 nnoremap <leader>d :DeniteBufferDir file_rec<cr>
+nnoremap <leader>o :Denite outline -mode=normal<cr>
 nnoremap <leader>h :Denite help<cr>
 nnoremap <leader>r :Denite register<cr>
 

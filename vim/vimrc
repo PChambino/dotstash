@@ -91,11 +91,12 @@ call denite#custom#map('insert', '<c-h>', '<denite:toggle_select_down>', 'norema
 
 call denite#custom#option('default', {
         \ 'auto_resize': 'true',
-        \ 'highlight_mode_normal': 'Search',
+        \ 'highlight_matched_char': 'Normal',
+        \ 'highlight_matched_range': 'Normal',
+        \ 'highlight_mode_insert': 'Search',
+        \ 'highlight_mode_normal': 'IncSearch',
         \ 'prompt': '❯',
-        \ 'reversed': 'true',
-        \ 'vertical_preview': '1',
-        \ 'winheight': '10',
+        \ 'winheight': '5',
         \ 'winminheight': '3',
         \ })
 

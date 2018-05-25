@@ -104,6 +104,7 @@ nnoremap <leader><leader> :Denite file_rec<cr>
 nnoremap <leader>b :Denite buffer<cr>
 nnoremap <leader>g :Denite grep:. -mode=normal<cr>
 nnoremap <leader>8 :DeniteCursorWord grep:. -mode=normal<cr>
+vnoremap <leader>8 "*y:Denite grep:. -mode=normal<cr>
 nnoremap <leader>d :DeniteBufferDir file_rec<cr>
 nnoremap <leader>o :Denite outline -mode=normal<cr>
 nnoremap <leader>h :Denite help<cr>

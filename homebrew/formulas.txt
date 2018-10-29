@@ -1,4 +1,6 @@
+bat
 ctags
+fd
 fish
 git
 gnu-sed

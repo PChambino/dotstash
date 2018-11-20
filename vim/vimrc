@@ -34,7 +34,6 @@ Plug 'saltstack/salt-vim', { 'for': 'sls' }
 Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
 " Plug 'rust-lang/rust.vim'
 Plug 'ElmCast/elm-vim', { 'for': 'elm' }
-Plug 'kien/rainbow_parentheses.vim', { 'for': 'clojure' }
 Plug 'venantius/vim-cljfmt', { 'for': 'clojure' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 " Plug 'tpope/vim-salve', { 'for': 'clojure' }

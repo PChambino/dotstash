@@ -1,9 +1,12 @@
 bat
+colordiff
 ctags
 fd
 fish
+fswatch
 git
 gnu-sed
+gnupg
 htop
 jq
 neovim
@@ -11,6 +14,10 @@ python3
 reattach-to-user-namespace
 ripgrep
 ruby
+ry
+stow
 the_silver_searcher
 tmux
 vim
+watch
+wget

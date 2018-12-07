@@ -46,7 +46,7 @@ colorscheme monokai
 if has("mouse") | set mouse=a | endif
 
 set autowrite " write when switching buffers
-set colorcolumn=80
+set colorcolumn=80,120
 set cursorline
 set foldlevelstart=99 " open folds by default
 set foldmethod=syntax

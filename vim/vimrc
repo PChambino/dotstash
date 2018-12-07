@@ -24,12 +24,13 @@ Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'roxma/vim-tmux-clipboard'
+Plug 'benmills/vimux'
 
 Plug 'scrooloose/syntastic'
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-Plug 'derekwyatt/vim-scala', { 'for': 'scala' }
-Plug 'derekwyatt/vim-sbt', { 'for': 'sbt.scala' }
-Plug 'saltstack/salt-vim', { 'for': 'sls' }
+" Plug 'derekwyatt/vim-scala', { 'for': 'scala' }
+" Plug 'derekwyatt/vim-sbt', { 'for': 'sbt.scala' }
+" Plug 'saltstack/salt-vim', { 'for': 'sls' }
 " Plug 'mustache/vim-mustache-handlebars'
 Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
 " Plug 'rust-lang/rust.vim'

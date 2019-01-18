@@ -1,5 +1,5 @@
 function addtopath
   for value in $argv
-    contains $value $PATH; or set PATH $value $PATH
+    set -gp fish_user_paths $value
   end
 end

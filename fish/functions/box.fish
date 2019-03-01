@@ -9,5 +9,5 @@ function box
     set projects_dir (pwd | sed '/.*\/box\/projects\/carwow\//s///')
   end
 
-  ssh -t box "cd /projects/carwow/$projects_dir && bash -lc '$command'"
+  ssh -t box "cd projects/carwow/$projects_dir && bash -lc '$command'"
 end

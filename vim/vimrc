@@ -109,6 +109,15 @@ nnoremap <leader>d :DeniteBufferDir file_rec<cr>
 nnoremap <leader>o :Denite outline -mode=normal<cr>
 nnoremap <leader>h :Denite help<cr>
 nnoremap <leader>r :Denite register<cr>
+nnoremap <leader>c :call RunCommandWithFile()<cr>
+
+function! RunCommandWithFile()
+  call inputsave()
+  let cmd = input('Command? ')
+  call inputrestore()
+
+  call VimuxRunCommand(cmd . " " . bufname("%"))
+endfunction
 
 let g:airline#extensions#tabline#enabled = 1
 

@@ -96,8 +96,8 @@ call denite#custom#option('default', {
         \ 'highlight_mode_insert': 'Search',
         \ 'highlight_mode_normal': 'IncSearch',
         \ 'prompt': '❯',
-        \ 'winheight': '10',
-        \ 'winminheight': '5',
+        \ 'winheight': '20',
+        \ 'winminheight': '10',
         \ })
 
 nnoremap <leader><leader> :Denite file_rec<cr>

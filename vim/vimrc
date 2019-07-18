@@ -22,7 +22,7 @@ Plug 'bling/vim-airline'
 " Plug 'itchyny/lightline.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'shougo/denite.nvim', { 'do': ':UpdateRemotePlugins', 'tag': '1.2' }
 Plug 'roxma/vim-tmux-clipboard'
 Plug 'benmills/vimux'
 
@@ -74,7 +74,7 @@ map <space> <leader>
 map <space><space> <leader><leader>
 
 call denite#custom#var('file_rec', 'command',
-      \ ['rg', '--files', '--glob', '!.git', ''])
+      \ ['rg', '--files', '--glob', '!.git'])
 call denite#custom#var('grep', 'command', ['rg'])
 call denite#custom#var('grep', 'default_opts',
       \ ['--hidden', '--vimgrep', '--no-heading', '-S'])

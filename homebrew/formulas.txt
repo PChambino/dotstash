@@ -20,6 +20,7 @@ ry
 stow
 the_silver_searcher
 tmux
+urlview
 vim
 watch
 wget

@@ -2,6 +2,9 @@
     name = Pedro Chambino
     email = pchambino@gmail.com
 
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
+
 [commit]
     gpgsign = true
 

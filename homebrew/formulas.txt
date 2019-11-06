@@ -10,6 +10,7 @@ gnu-sed
 gnupg
 htop
 httpie
+hub
 jq
 neovim
 python3

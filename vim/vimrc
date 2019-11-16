@@ -18,22 +18,15 @@ Plug 'AndrewRadev/splitjoin.vim' " gS gJ
 
 Plug 'sickill/vim-monokai'
 Plug 'bling/vim-airline'
-" Plug 'tpope/vim-flagship'
-" Plug 'itchyny/lightline.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'shougo/denite.nvim', { 'do': ':UpdateRemotePlugins', 'tag': '1.2' }
 Plug 'roxma/vim-tmux-clipboard'
 Plug 'benmills/vimux'
 
-Plug 'scrooloose/syntastic'
+Plug 'dense-analysis/ale'
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-" Plug 'derekwyatt/vim-scala', { 'for': 'scala' }
-" Plug 'derekwyatt/vim-sbt', { 'for': 'sbt.scala' }
-" Plug 'saltstack/salt-vim', { 'for': 'sls' }
-" Plug 'mustache/vim-mustache-handlebars'
 Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
-" Plug 'rust-lang/rust.vim'
 Plug 'ElmCast/elm-vim', { 'for': 'elm' }
 Plug 'venantius/vim-cljfmt', { 'for': 'clojure' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
@@ -125,3 +118,11 @@ let g:indent_guides_enable_on_vim_startup = 1
 let g:indent_guides_auto_colors = 0
 au VimEnter,Colorscheme * :hi IndentGuidesOdd ctermbg=NONE
 au VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=0
+
+let g:ale_linters_explicit = 1
+let g:ale_lint_on_enter = 0
+let g:ale_lint_on_filetype_changed = 0
+let g:ale_lint_on_insert_leave = 0
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_fix_on_save = 1

@@ -1,5 +1,9 @@
 setlocal foldmethod=indent
-let g:elm_format_fail_silently = 1
+
+let b:ale_linters = ['make']
+let b:ale_fixers = ['format']
+
 let g:elm_setup_keybindings = 0
-nnoremap <buffer> K :ElmShowDocs<cr>
-nnoremap <buffer> KK :ElmBrowseDocs<cr>
+let g:elm_format_autosave = 0
+
+nnoremap <buffer> K :!open https://package.elm-lang.org/<cr><cr>

@@ -4,6 +4,7 @@ ctags
 entr
 fd
 fish
+fswatch
 fzf
 git
 gnu-sed

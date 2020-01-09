@@ -47,8 +47,8 @@
     r = log -p --reverse --patience -M -C -C --no-prefix
     info = remote show origin
     hub = !hub browse
-    ppr = !hub pull-request -f -p -a PChambino --no-edit
-    ppro = !git ppr -o
+    pr = !hub pull-request -f -p -a PChambino --no-edit -o
+    cs = !hub ci-status -v
 
 [push]
     default = current

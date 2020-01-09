@@ -18,5 +18,23 @@ function fish_prompt
     set gs_info "$green (gs)"
   end
 
+  if test -e .git; and which hub > /dev/null
+    set -l now (date +%s)
+    set -l last (stat -f %m .git/ci-status 2> /dev/null; or echo 0)
+    if test (expr $now - $last) -gt 30
+      touch .git/ci-status
+      switch (hub ci-status)
+        case success
+          set __fish_git_prompt_color_branch green
+        case failure
+          set __fish_git_prompt_color_branch red
+        case pending
+          set __fish_git_prompt_color_branch yellow
+        case '*'
+          set __fish_git_prompt_color_branch red
+      end
+    end
+  end
+
   echo -n -s $arrow $cwd $git_info $gs_info $normal " "
 end

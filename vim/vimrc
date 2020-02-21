@@ -48,6 +48,7 @@ set lazyredraw
 set list listchars=tab:▸\ ,trail:·,nbsp:␣,extends:>,precedes:< showbreak=↪ 
 set nobackup
 set noswapfile
+set shada="NONE"
 set splitbelow
 set splitright
 set tags=.tags " use hidden tags file

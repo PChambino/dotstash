@@ -1,5 +1,5 @@
 function fsw
   clear
-  and $argv
-  and fswatch -o . -l 1 | xargs -n1 sh -c "clear; $argv"
+  $argv
+  fswatch -l 2 -e .git -e '~$' -e '[0-9]$' -o . | xargs -o -IX $SHELL -c "clear; $argv"
 end

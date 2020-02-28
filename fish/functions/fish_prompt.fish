@@ -23,7 +23,7 @@ function fish_prompt
     set -l last (stat -f %m .git/ci-status 2> /dev/null; or echo 0)
     if test (expr $now - $last) -gt 30
       touch .git/ci-status
-      switch (hub ci-status 2> /dev/null || echo error)
+      switch (hub ci-status 2> /dev/null)
         case success
           set __fish_git_prompt_color_branch green
         case failure

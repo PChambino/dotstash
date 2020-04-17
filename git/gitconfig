@@ -24,6 +24,7 @@
     dc = !git d --cached
     ds = !git d --stat
     co = checkout
+    cm = checkout master
     cb = checkout -b
     cp = cherry-pick
     ci = commit -v

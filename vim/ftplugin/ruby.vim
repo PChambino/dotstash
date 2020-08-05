@@ -8,7 +8,7 @@ if v:shell_error == 0
     call add(b:ale_fixers, 'rubocop')
 endif
 
-call system('grep standardrb Gemfile')
+call system('grep -w standard Gemfile')
 
 if v:shell_error == 0
     call add(b:ale_linters, 'standardrb')

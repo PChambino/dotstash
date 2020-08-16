@@ -83,6 +83,7 @@ noremap <c-x> <esc>:bd<cr>
 nnoremap g<space> :G 
 nnoremap gs :G<cr>
 nnoremap gb :G blame<cr>
+nnoremap gh :Gbrowse<cr>
 
 map <space> <leader>
 map <space><space> <leader><leader>

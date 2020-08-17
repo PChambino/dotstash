@@ -5,5 +5,4 @@ cd `dirname $0`
 
 mkdir -p ~/.gnupg
 chmod 700 ~/.gnupg
-link_file `pwd`/gpg.conf ~/.gnupg/gpg.conf
 link_file `pwd`/gpg-agent.conf ~/.gnupg/gpg-agent.conf

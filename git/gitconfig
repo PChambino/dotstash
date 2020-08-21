@@ -49,6 +49,7 @@
     info = remote show origin
     hub = !hub browse
     pr = !hub pull-request -f -p -a PChambino --no-edit -o
+    gpr = !hub pull-request -f -p -a PChambino --no-edit -o
     cs = !hub ci-status -v
 
 [push]

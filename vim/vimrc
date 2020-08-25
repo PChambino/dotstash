@@ -37,6 +37,7 @@ Plug 'dag/vim-fish', { 'for': 'fish' }
 call plug#end()
 
 colorscheme monokai
+hi! SpellCap NONE ctermbg=24
 
 if has("mouse") | set mouse=a | endif
 

@@ -69,7 +69,6 @@ inoremap <c-s> <esc>:w<cr>
 noremap <c-s> <esc>:w<cr>
 inoremap <c-x> <esc>:bd<cr>
 noremap <c-x> <esc>:bd<cr>
-inoremap <c-w>x <esc><c-^>:bd#<cr>
 noremap <c-w>x <esc><c-^>:bd#<cr>
 
 nnoremap g<space> :G 
@@ -81,6 +80,7 @@ map <space> <leader>
 map <space><space> <leader><leader>
 
 nnoremap <leader><leader> :GFiles<cr>
+nnoremap <leader>f :Files<cr>
 nnoremap <leader>b :Buffers<cr>
 nnoremap <leader>g :Ag 
 nnoremap <leader>8 :Ag <c-r><c-w><cr>

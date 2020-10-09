@@ -1,6 +1,7 @@
 bat
 colordiff
 ctags
+dust
 entr
 fd
 fish
@@ -15,11 +16,14 @@ hub
 jq
 neovim
 pinentry-mac
+procs
 python3
 ripgrep
 ruby
 ry
+sd
 stow
+tokei
 the_silver_searcher
 tmux
 urlview

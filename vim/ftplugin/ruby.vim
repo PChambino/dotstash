@@ -10,12 +10,7 @@ endif
 
 call system('grep -w standard Gemfile')
 
-if v:shell_error == 0
-    call add(b:ale_linters, 'standardrb')
-    call add(b:ale_fixers, 'standardrb')
-endif
-
-if b:ale_fixers == []
+if v:shell_error == 0 || b:ale_fixers == []
     call add(b:ale_linters, 'standardrb')
     call add(b:ale_fixers, 'standardrb')
 endif

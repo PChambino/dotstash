@@ -29,6 +29,7 @@ Plug 'benmills/vimux'
 
 Plug 'dense-analysis/ale'
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+Plug 'vim-crystal/vim-crystal', { 'for': 'crystal' }
 Plug 'elixir-lang/vim-elixir', { 'for': 'elixir' }
 Plug 'ElmCast/elm-vim', { 'for': 'elm' }
 Plug 'venantius/vim-cljfmt', { 'for': 'clojure' }

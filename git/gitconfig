@@ -13,6 +13,7 @@
     pager = less -FX
     whitespace = trailing-space,space-before-tab,tab-in-indent
     excludesfile = ~/.gitignore_global
+    attributesfile = ~/.gitattributes_global
 
 [alias]
     s = status -sb

@@ -5,3 +5,4 @@ cd `dirname $0`
 
 link_file `pwd`/gitconfig ~/.gitconfig
 link_file `pwd`/gitignore_global ~/.gitignore_global
+link_file `pwd`/gitattributes_global ~/.gitattributes_global

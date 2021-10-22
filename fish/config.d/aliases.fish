@@ -8,3 +8,4 @@ alias h heroku
 alias r rake
 alias t terraform
 alias v vagrant
+alias weather 'curl https://wttr.in'

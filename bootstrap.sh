@@ -6,8 +6,10 @@ case $(uname) in
     Darwin)
         homebrew/install.sh
         python/install.sh
+	;;
     Linux)
-        apt install tmux neovim
+        sudo apt install -y fish tmux neovim
+	;;
 esac
 
 for SCRIPT in */link.sh; do $SCRIPT; done

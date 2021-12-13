@@ -11,10 +11,8 @@ case $(uname) in
         sudo apt install -y software-properties-common
         sudo apt-add-repository ppa:fish-shell/release-3
         sudo apt-add-repository ppa:git-core/ppa
+        sudo apt update
         sudo apt install -y fish tmux neovim git colordiff
-        if [ $(id -nu) == "vscode" ]; then
-            usermod -s $(which fish) vscode
-        fi
         ;;
 esac
 

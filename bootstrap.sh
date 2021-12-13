@@ -10,7 +10,8 @@ case $(uname) in
     Linux)
         sudo apt install -y software-properties-common
         sudo apt-add-repository ppa:fish-shell/release-3
-        sudo apt install -y fish tmux neovim
+        sudo apt-add-repository ppa:git-core/ppa
+        sudo apt install -y fish tmux neovim git colordiff
         ;;
 esac
 

@@ -5,12 +5,12 @@ call system('test -e .rubocop.yml')
 
 if v:shell_error == 0
     call add(b:ale_linters, 'rubocop')
-    call add(b:ale_fixers, 'rubocop')
+    " call add(b:ale_fixers, 'rubocop')
 endif
 
-call system('grep -w standard Gemfile')
+call system('grep -w standard Gemfile *.gemspec')
 
-if v:shell_error == 0 || b:ale_fixers == []
+if v:shell_error == 0 || b:ale_linters == []
     call add(b:ale_linters, 'standardrb')
     call add(b:ale_fixers, 'standardrb')
 endif

@@ -1,7 +1,9 @@
 alias b bundle
 alias be 'b exec'
 alias c carwow
-alias carwow 'box carwow'
+if test -e ~/box
+  alias carwow 'box carwow'
+end
 alias cr 'carwow run'
 alias g git
 alias h heroku

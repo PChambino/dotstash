@@ -8,10 +8,10 @@ function fish_prompt
 
   set -l host
   if test -n "$SSH_CLIENT"
-    set host "$green ssh:($dim"(hostname)"$normal$green) "
+    set host $green"ssh:($dim"(hostname)"$normal$green) "
   end
 
-  set -l arrow "$red➜"
+  set -l arrow "$red➜ "
   set -l cwd $cyan(basename (prompt_pwd))
 
   set -l git_info (__fish_git_prompt "%s")

@@ -9,8 +9,8 @@ case $(uname) in
         ;;
     Linux)
         sudo apt install -y software-properties-common
-        sudo apt-add-repository ppa:fish-shell/release-3
-        sudo apt-add-repository ppa:git-core/ppa
+        sudo apt-add-repository -y ppa:fish-shell/release-3
+        sudo apt-add-repository -y ppa:git-core/ppa
         sudo apt update
         sudo apt install -y fish tmux neovim git colordiff silversearcher-ag ripgrep
         ;;

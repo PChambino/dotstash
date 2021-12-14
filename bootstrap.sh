@@ -12,7 +12,7 @@ case $(uname) in
         sudo apt-add-repository -y ppa:fish-shell/release-3
         sudo apt-add-repository -y ppa:git-core/ppa
         sudo apt update
-        sudo apt install -y fish tmux neovim git colordiff silversearcher-ag ripgrep
+        sudo apt install -y fish tmux neovim git colordiff silversearcher-ag ripgrep bat
         ;;
 esac
 

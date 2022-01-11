@@ -1,3 +1,3 @@
 if test -e /workspaces
-  export CDPATH="/workspaces:/workspaces/.codespaces/.persistedshare:"
+  set -gp CDPATH /workspaces /workspaces/.codespaces/.persistedshare
 end

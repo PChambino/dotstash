@@ -1,3 +1,4 @@
+set -xg CLICOLOR 1
 set -xg DISABLE_SPRING 1
 set -xg EDITOR nvim
 set -xg GPG_TTY (tty)

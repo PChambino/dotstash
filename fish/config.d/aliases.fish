@@ -5,9 +5,10 @@ if test -e ~/box
   alias carwow 'box carwow'
 end
 alias cr 'carwow run'
+alias cl 'carwow clj lein'
 alias g git
 alias h heroku
 alias r rake
 alias t terraform
 alias v vagrant
-alias weather 'curl https://wttr.in'
+alias wttr 'curl https://wttr.in'

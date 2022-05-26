@@ -12,10 +12,13 @@ case $(uname) in
         sudo apt-add-repository -y ppa:fish-shell/release-3
         sudo apt-add-repository -y ppa:git-core/ppa
         sudo apt update
+
         # force-overwrite: https://github.com/sharkdp/bat/issues/938
         sudo apt install -y \
             -o Dpkg::Options::="--force-overwrite" \
             fish tmux neovim git colordiff silversearcher-ag ripgrep bat
+
+        python/install.sh
         ;;
 esac
 

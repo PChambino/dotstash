@@ -15,5 +15,9 @@ if which ry > /dev/null
   addtopath /usr/local/lib/ry/current/bin
 end
 
+if [ -e ~/projects/carwow/dev-environment -a (uname -m) = "arm64" ]
+  addtopath ~/projects/carwow/dev-environment/bin
+end
+
 addtopath ~/.local/bin
 addtopath bin

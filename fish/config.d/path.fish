@@ -1,3 +1,7 @@
+if [ -e /opt/homebrew ]
+  eval (/opt/homebrew/bin/brew shellenv)
+end
+
 if [ -e /Applications/SnowSQL.app ]
   addtopath /Applications/SnowSQL.app/Contents/MacOS
 end

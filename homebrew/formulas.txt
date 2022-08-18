@@ -1,7 +1,6 @@
 bat
 colordiff
 ctags
-delta
 dust
 entr
 fd
@@ -29,6 +28,5 @@ tokei
 the_silver_searcher
 tmux
 urlview
-vim
 watch
 wget

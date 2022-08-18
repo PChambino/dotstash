@@ -11,8 +11,13 @@ if which go > /dev/null
 end
 
 if which ry > /dev/null
-  addtopath /usr/local/lib/ruby/gems/2.7.0/bin
-  addtopath /usr/local/lib/ry/current/bin
+  if [ -e /opt/homebrew ]
+    addtopath /opt/homebrew/Cellar/ruby/3.1.2/bin
+    addtopath /opt/homebrew/lib/ry/current/bin
+  else
+    addtopath /usr/local/lib/ruby/gems/2.7.0/bin
+    addtopath /usr/local/lib/ry/current/bin
+  end
 end
 
 if [ -e ~/projects/carwow/dev-environment -a (uname -m) = "arm64" ]

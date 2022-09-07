@@ -25,6 +25,7 @@ ruby
 ry
 sd
 stow
+terraform
 tokei
 the_silver_searcher
 tmux

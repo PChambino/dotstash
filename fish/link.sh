@@ -5,5 +5,6 @@ cd `dirname $0`
 
 mkdir -p ~/.config/fish
 link_file `pwd`/config.fish ~/.config/fish/config.fish
-link_file `pwd`/config.d ~/.config/fish/config.d
+rmdir ~/.config/fish/conf.d
+link_file `pwd`/conf.d ~/.config/fish/conf.d
 link_file `pwd`/functions ~/.config/fish/functions

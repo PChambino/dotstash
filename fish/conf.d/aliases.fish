@@ -1,11 +1,10 @@
 alias b bundle
 alias be 'b exec'
-alias c carwow
-if test -e ~/box
-  alias carwow 'box carwow'
+if which carwow > /dev/null
+  alias c carwow
+  alias cr 'c run'
+  alias cl 'c clj lein'
 end
-alias cr 'carwow run'
-alias cl 'carwow clj lein'
 alias g git
 alias h heroku
 alias r rake

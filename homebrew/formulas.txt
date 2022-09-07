@@ -10,6 +10,7 @@ fzf
 git
 gnu-sed
 gnupg
+go
 htop
 httpie
 hub

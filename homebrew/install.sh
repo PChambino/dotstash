@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 cd `dirname $0`
-if test ! $(which brew); then
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+if test ! -e /opt/homebrew/bin/brew; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
-brew install $(cat formulas.txt)
+/opt/homebrew/bin/brew install $(cat formulas.txt)

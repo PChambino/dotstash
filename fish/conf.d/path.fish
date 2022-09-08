@@ -1,5 +1,11 @@
 if [ -e /opt/homebrew/bin/brew ]
-  eval (/opt/homebrew/bin/brew shellenv)
+  # eval (/opt/homebrew/bin/brew shellenv)
+  set -gx HOMEBREW_PREFIX /opt/homebrew
+  set -gx HOMEBREW_CELLAR /opt/homebrew/Cellar
+  set -gx HOMEBREW_REPOSITORY /opt/homebrew
+  addtopath /opt/homebrew/bin /opt/homebrew/sbin
+  set -gp MANPATH /opt/homebrew/share/man
+  set -gp INFOPATH /opt/homebrew/share/info
 end
 
 if [ -e /Applications/SnowSQL.app ]

@@ -1,6 +1,6 @@
 alias b bundle
 alias be 'b exec'
-if which carwow > /dev/null
+if [ -e ~/Code/carwow/dev-environment ]
   alias c carwow
   alias cr 'c run'
   alias cl 'c clj lein'

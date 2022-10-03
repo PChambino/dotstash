@@ -25,8 +25,8 @@ if [ (which ry) = /opt/homebrew/bin/ry ]
   addtopath /opt/homebrew/lib/ry/current/bin
 end
 
-if [ -e ~/projects/carwow/dev-environment ]
-  addtopath ~/projects/carwow/dev-environment/bin
+if [ -e ~/Code/carwow/dev-environment ]
+  addtopath ~/Code/carwow/dev-environment/bin
 end
 
 addtopath ~/.local/bin

@@ -75,7 +75,7 @@ noremap <c-w>x <esc><c-^>:bd#<cr>
 nnoremap g<space> :G 
 nnoremap gs :G<cr>
 nnoremap gb :G blame<cr>
-nnoremap gh :Gbrowse<cr>
+nnoremap gh :GBrowse<cr>
 
 map <space> <leader>
 map <space><space> <leader><leader>

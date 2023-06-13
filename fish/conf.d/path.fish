@@ -12,6 +12,10 @@ if [ -e /Applications/SnowSQL.app ]
   addtopath /Applications/SnowSQL.app/Contents/MacOS
 end
 
+if [ -e /opt/homebrew/opt/openjdk ]
+  addtopath /opt/homebrew/opt/openjdk/bin
+end
+
 if [ -e ~/go/bin ]
   addtopath ~/go/bin
 end

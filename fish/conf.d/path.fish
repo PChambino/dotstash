@@ -22,7 +22,7 @@ end
 
 if [ -e /opt/homebrew/opt/ruby/bin ]
   addtopath /opt/homebrew/opt/ruby/bin
-  addtopath (gem env path | string split :)
+  addtopath (gem env home)/bin
 end
 
 if [ (which ry) = /opt/homebrew/bin/ry ]

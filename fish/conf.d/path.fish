@@ -16,6 +16,10 @@ if [ -e /opt/homebrew/opt/openjdk ]
   addtopath /opt/homebrew/opt/openjdk/bin
 end
 
+if [ -e ~/.google-cloud-sdk ]
+  addtopath ~/.google-cloud-sdk/bin
+end
+
 if [ -e ~/go/bin ]
   addtopath ~/go/bin
 end

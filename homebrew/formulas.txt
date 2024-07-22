@@ -18,6 +18,8 @@ httpie
 hub
 hyperfine
 jq
+lazydocker
+lazygit
 neovim
 pinentry-mac
 procs

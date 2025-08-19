@@ -19,17 +19,3 @@ Host 192.168.*
 Host 172.31.*
    StrictHostKeyChecking no
    UserKnownHostsFile /dev/null
-Host box
-  HostName 127.0.0.1
-  User vagrant
-  Port 2222
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  PasswordAuthentication no
-  IdentityFile ~/box/.vagrant/machines/default/virtualbox/private_key
-  IdentitiesOnly yes
-  LogLevel QUIET
-  ForwardAgent yes
-  ControlMaster auto
-  ControlPath ~/.ssh/sockets/%C
-  ControlPersist 3600

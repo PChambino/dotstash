@@ -55,6 +55,8 @@
     pr = !hub pull-request -f -p -a PChambino --no-edit -o
     gpr = !hub pull-request -f -p -a PChambino --no-edit -o
     cs = !hub ci-status -v
+    cop = !git diff --name-only | grep -E '\\.rb$' | xargs bin/rubocop
+    cop-last = !git show --name-only --pretty=format: | grep -E '\\.rb$' | xargs bin/rubocop
 
 [push]
     default = current

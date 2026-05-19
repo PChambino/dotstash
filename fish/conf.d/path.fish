@@ -8,8 +8,8 @@ if [ -e /opt/homebrew/bin/brew ]
   set -gp INFOPATH /opt/homebrew/share/info
 end
 
-if [ -e /Applications/SnowSQL.app ]
-  addtopath /Applications/SnowSQL.app/Contents/MacOS
+if [ -e /Applications/SnowflakeCLI.app ]
+  addtopath /Applications/SnowflakeCLI.app/Contents/MacOS
 end
 
 if [ -e /opt/homebrew/opt/openjdk ]

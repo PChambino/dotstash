@@ -31,7 +31,6 @@ sd
 stow
 terraform
 tokei
-the_silver_searcher
 tmux
 urlview
 watch

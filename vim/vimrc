@@ -35,6 +35,7 @@ Plug 'ElmCast/elm-vim', { 'for': 'elm' }
 Plug 'venantius/vim-cljfmt', { 'for': 'clojure' }
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 Plug 'dag/vim-fish', { 'for': 'fish' }
+Plug 'MeanderingProgrammer/render-markdown.nvim', { 'for': 'markdown' }
 call plug#end()
 
 colorscheme monokai
@@ -83,9 +84,9 @@ map <space><space> <leader><leader>
 nnoremap <leader><leader> :GFiles<cr>
 nnoremap <leader>f :Files<cr>
 nnoremap <leader>b :Buffers<cr>
-nnoremap <leader>g :Ag 
-nnoremap <leader>8 :Ag <c-r><c-w><cr>
-vnoremap <leader>8 y:Ag <c-r>"<cr>
+nnoremap <leader>g :Rg 
+nnoremap <leader>8 :Rg <c-r><c-w><cr>
+vnoremap <leader>8 y:Rg <c-r>"<cr>
 nnoremap <leader>d :Files <C-R>=expand('%:h')<CR><CR>
 nnoremap <leader>c :call RunCommandWithFile()<cr>
 

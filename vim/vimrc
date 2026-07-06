@@ -112,3 +112,17 @@ let g:ale_lint_on_insert_leave = 0
 let g:ale_lint_on_save = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_fix_on_save = 1
+
+" Override :Rg/:RG to brighten ripgrep's dim path (magenta) and line (green)
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   "rg --column --line-number --no-heading --color=always "
+  \   . "--colors 'path:style:intense' --colors 'line:style:intense' "
+  \   . "--smart-case -- " . fzf#shellescape(<q-args>),
+  \   fzf#vim#with_preview(), <bang>0)
+command! -bang -nargs=* RG
+  \ call fzf#vim#grep2(
+  \   "rg --column --line-number --no-heading --color=always "
+  \   . "--colors 'path:style:intense' --colors 'line:style:intense' "
+  \   . "--smart-case -- ",
+  \   <q-args>, fzf#vim#with_preview(), <bang>0)

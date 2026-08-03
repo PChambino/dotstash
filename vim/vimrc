@@ -92,6 +92,9 @@ nnoremap <leader>8 :Rg <c-r><c-w><cr>
 vnoremap <leader>8 y:Rg <c-r>"<cr>
 nnoremap <leader>d :Files <C-R>=expand('%:h')<CR><CR>
 nnoremap <leader>c :call RunCommandWithFile()<cr>
+nnoremap <leader>w :call wt#switch()<cr>
+nnoremap <leader>W :call wt#main()<cr>
+nnoremap <leader>t :call wt#tabs()<cr>
 
 function! RunCommandWithFile()
   call inputsave()

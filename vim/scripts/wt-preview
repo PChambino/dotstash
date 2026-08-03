@@ -1,0 +1,32 @@
+#!/bin/sh
+# fzf preview for a git worktree. Empty sections are skipped.
+# Colours need -c color.ui=always (stdout is not a tty) and fzf's --ansi.
+
+dir=$1
+[ -n "$dir" ] && [ -d "$dir" ] || exit 0
+
+heading() {
+    printf '\033[1;34m── %s ──\033[0m\n' "$1"
+}
+
+section() {
+    h=$1
+    shift
+    body=$(git -C "$dir" -c color.ui=always "$@" 2>/dev/null | head -n 400)
+    [ -n "$body" ] || return 0
+    heading "$h"
+    printf '%s\n\n' "$body"
+}
+
+# `git s` always has output, so its failure doubles as the not-a-repo check.
+if ! status=$(git -C "$dir" -c color.ui=always s 2>/dev/null); then
+    echo 'not a git repository'
+    exit 0
+fi
+heading status
+printf '%s\n\n' "$status"
+
+section 'working tree' d
+section staged d --cached # `dc` is `!git d --cached`: same output, extra fork
+section recent l -3
+section HEAD show

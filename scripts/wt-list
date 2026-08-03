@@ -1,0 +1,58 @@
+#!/bin/sh
+# One line per live git worktree, newest created first, tab separated:
+#   birthtime  path  name  branch  age
+# The main checkout is excluded. Registrations whose checkout is gone are too.
+
+set -u
+
+tmp=${TMPDIR:-/tmp}/wt-list.$$
+trap 'rm -f "$tmp" "$tmp.live" "$tmp.birth"' EXIT INT TERM
+
+git worktree list --porcelain 2>/dev/null > "$tmp" || exit 1
+[ -s "$tmp" ] || exit 1
+
+root=$(sed -n '1s/^worktree //p' "$tmp")
+[ -n "$root" ] || exit 1
+
+# n only counts emitted records, so n == 1 is the main checkout.
+awk '
+    /^worktree /  { p = substr($0, 10); b = ""; next }
+    /^branch /    { b = substr($0, 8); sub(/^refs\/heads\//, "", b); next }
+    /^detached$/  { b = "detached"; next }
+    /^prunable/   { p = ""; next }
+    /^$/          { if (p != "" && ++n > 1) print p "\t" b; p = ""; b = "" }
+    END           { if (p != "" && ++n > 1) print p "\t" b }
+' "$tmp" > "$tmp.live"
+
+# Drop anything whose directory has since vanished, so the batched stat below
+# stays aligned with the list it is joined against.
+# IFS=$tab, not a literal tab: the shell would read that as plain whitespace.
+tab=$(printf '\t')
+while IFS=$tab read -r path branch; do
+    [ -d "$path" ] && printf '%s\t%s\n' "$path" "$branch"
+done < "$tmp.live" > "$tmp"
+mv "$tmp" "$tmp.live"
+[ -s "$tmp.live" ] || exit 1
+
+# %B is the birth time: when the worktree was created. One stat for the lot.
+cut -f1 "$tmp.live" | tr '\n' '\0' | xargs -0 stat -f '%B' > "$tmp.birth"
+
+paste "$tmp.birth" "$tmp.live" | awk -F'\t' -v now="$(date +%s)" -v root="$root" '
+{
+    birth = $1; path = $2; branch = $3
+
+    name = path
+    if (index(name, root "/") == 1) name = substr(name, length(root) + 2)
+    if (index(name, ".claude/worktrees/") == 1) name = "claude/" substr(name, 19)
+    else if (index(name, ".worktrees/") == 1) name = substr(name, 12)
+
+    mins = int((now - birth) / 60)
+    if (mins < 60)        age = mins "m ago"
+    else if (mins < 1440) age = int(mins / 60) "h ago"
+    else                  age = int(mins / 1440) "d ago"
+
+    # The branch is usually just worktree/<name>; only worth showing when it is not.
+    if (branch != "worktree/" name && branch != name) age = age "  " branch
+
+    print birth "\t" path "\t" name "\t" branch "\t" age
+}' | sort -rn

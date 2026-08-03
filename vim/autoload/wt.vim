@@ -1,13 +1,13 @@
 " Git worktree helpers, ordered newest-created first.
 " Vimscript, not lua: vim/link.sh points ~/.vimrc and init.vim at the same file.
 
-" resolve() sees through the symlinked autoload dir into the dotstash checkout.
-let s:preview = shellescape(
-      \ fnamemodify(resolve(expand('<sfile>:p')), ':h:h') . '/scripts/wt-preview')
+" wt-list and wt-preview are linked onto PATH by scripts/link.sh, and shared
+" with fish's `wt`.
+let s:preview = 'wt-preview'
 
-" fish's __wt_list emits: birthtime, path, name, branch, age.
+" wt-list emits: birthtime, path, name, branch, age.
 function! s:worktrees() abort
-  let lines = systemlist('fish -c __wt_list')
+  let lines = systemlist('wt-list')
   if v:shell_error != 0
     return []
   endif

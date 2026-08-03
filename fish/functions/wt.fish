@@ -12,6 +12,7 @@ function wt -d "cd to a git worktree, newest first"
             'wt <name>       cd to the newest worktree matching <name>' \
             'wt -            cd to the previous directory, as `cd -`' \
             'wt -p           pick a worktree with fzf' \
+            'wt -p <name>    page that worktree'\''s preview; <name> may be a path' \
             'wt -l           list worktrees, newest first' \
             'wt -m           cd to the main checkout'
         return 0
@@ -21,6 +22,13 @@ function wt -d "cd to a git worktree, newest first"
     # where you came from is worth doing whether or not there's a repo here.
     if test "$argv[1]" = -
         cd -
+        return
+    end
+
+    # `wt -p <dir>` previews a path outright. Handled before the repo check so it
+    # works anywhere, including a repo with no worktrees of its own.
+    if set -q _flag_pick; and set -q argv[1]; and test -d $argv[1]
+        wt-preview $argv[1] | less -RFX
         return
     end
 
@@ -55,7 +63,7 @@ function wt -d "cd to a git worktree, newest first"
 
     # Same list and preview the nvim <leader>w picker uses; reshaped to
     # "path <tab> display" so the padding is ours and {1} stays the path.
-    if set -q _flag_pick
+    if set -q _flag_pick; and not set -q argv[1]
         set -l sel (printf '%s\n' $rows \
             | awk -F\t '{printf "%s\t%-50s %s\n", $2, $3, $5}' \
             | fzf --delimiter=\t --with-nth=2 --ansi \
@@ -74,31 +82,39 @@ function wt -d "cd to a git worktree, newest first"
         return 0
     end
 
+    # Work out which worktree is meant, then either preview it or cd into it.
+    set -l target
     if not set -q argv[1]
-        cd (string split \t -- $rows[1])[2]
+        set target (string split \t -- $rows[1])[2]
+    else
+        # An exact name wins outright; otherwise take the newest substring match.
+        set -l hits
+        for row in $rows
+            set -l f (string split \t -- $row)
+            if test $f[3] = $argv[1]
+                set target $f[2]
+                break
+            end
+            string match -qi -- "*$argv[1]*" $f[3]
+            and set -a hits $row
+        end
+
+        if not set -q target[1]
+            if not set -q hits[1]
+                echo "wt: no worktree matching '$argv[1]'" >&2
+                return 1
+            end
+            set -l f (string split \t -- $hits[1])
+            if set -q hits[2]
+                echo "wt: "(count $hits)" matches, taking the newest ($f[3])" >&2
+            end
+            set target $f[2]
+        end
+    end
+
+    if set -q _flag_pick
+        wt-preview $target | less -RFX
         return
     end
-
-    # An exact name wins outright; otherwise take the newest substring match.
-    set -l hits
-    for row in $rows
-        set -l f (string split \t -- $row)
-        if test $f[3] = $argv[1]
-            cd $f[2]
-            return
-        end
-        string match -qi -- "*$argv[1]*" $f[3]
-        and set -a hits $row
-    end
-
-    if not set -q hits[1]
-        echo "wt: no worktree matching '$argv[1]'" >&2
-        return 1
-    end
-
-    set -l f (string split \t -- $hits[1])
-    if set -q hits[2]
-        echo "wt: "(count $hits)" matches, taking the newest ($f[3])" >&2
-    end
-    cd $f[2]
+    cd $target
 end

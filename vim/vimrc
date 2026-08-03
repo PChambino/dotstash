@@ -84,6 +84,9 @@ map <space><space> <leader><leader>
 nnoremap <leader><leader> :GFiles<cr>
 nnoremap <leader>f :Files<cr>
 nnoremap <leader>b :Buffers<cr>
+nnoremap <leader>G :GFiles?<cr>
+nnoremap <leader>l :Commits<cr>
+nnoremap <leader>L :BCommits<cr>
 nnoremap <leader>g :Rg 
 nnoremap <leader>8 :Rg <c-r><c-w><cr>
 vnoremap <leader>8 y:Rg <c-r>"<cr>

@@ -28,5 +28,4 @@ printf '%s\n\n' "$status"
 
 section 'working tree' d
 section staged d --cached # `dc` is `!git d --cached`: same output, extra fork
-section recent l -3
-section HEAD show
+section HEAD last

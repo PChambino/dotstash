@@ -1,0 +1,95 @@
+#!/bin/sh
+# Claude Code status line: repo/worktree, git state, context, 5h limit.
+#   dotstash git:(master →✗?↑2)  ctx 40k+18k  5h 42%
+#
+# The payload arrives as JSON on stdin; see the statusLine schema in the claude
+# binary. POSIX sh, not fish: this reruns on a 300ms debounce, and `fish -c
+# '__fish_git_prompt'` costs 273ms against 12ms for one `git status`.
+
+set -u
+
+esc=$(printf '\033')
+red="$esc[31m"; green="$esc[32m"; yellow="$esc[33m"
+blue="$esc[34m"; cyan="$esc[36m"; off="$esc[0m"
+
+fields=$(jq -r '
+    .cwd // "",
+    (.workspace.repo.name // ""),
+    (.workspace.git_worktree // ""),
+    .transcript_path // "",
+    (.context_window.total_input_tokens // 0),
+    (.rate_limits.five_hour.used_percentage // "")
+' 2>/dev/null)
+cwd= repo= worktree= transcript= total=0 five=
+{
+    read -r cwd
+    read -r repo
+    read -r worktree
+    read -r transcript
+    read -r total
+    read -r five
+} <<EOF
+$fields
+EOF
+
+# The repo name beats basename $cwd, which is whatever subdirectory we're in.
+name=${repo:-$(basename "$cwd")}
+[ -n "$worktree" ] && name="$name/$worktree"
+out="$cyan$name$off"
+
+# One `git status` covers branch, upstream, index, worktree and stash. Glyphs
+# and colours mirror fish/conf.d/git.fish, so the two prompts read alike. The
+# branch is dropped when a worktree is named, since the two usually match.
+git_state=$([ -d "$cwd" ] && git -C "$cwd" status --porcelain=v2 --branch --show-stash 2>/dev/null | awk -v r="$red" -v g="$green" -v y="$yellow" -v o="$off" -v hide="$worktree" '
+    /^# branch.head /   { head = $3; next }
+    /^# branch.ab /     { ahead = $3 + 0; behind = -($4 + 0); next }
+    /^# stash /         { stash = 1; next }
+    /^[12] /            { if (substr($2, 1, 1) != ".") staged = 1
+                          if (substr($2, 2, 1) != ".") dirty = 1
+                          next }
+    /^u /               { conflict = 1; next }
+    /^\? /              { untracked = 1 }
+    END {
+        if (head == "") exit 1
+        if (staged)    f = f g "→"
+        if (dirty)     f = f y "✗"
+        if (conflict)  f = f y "⚡"
+        if (untracked) f = f r "?"
+        if (stash)     f = f y "↩"
+        if (ahead)     f = f g "↑" ahead
+        if (behind)    f = f g "↓" behind
+        # Detached still shows: that is never what the worktree name says.
+        b = head == "(detached)" ? "detached" : (hide ? "" : head)
+        if (b == "" && f == "") exit 0
+        print (b ? r b : "") (b && f ? " " : "") f o
+    }')
+[ -n "$git_state" ] && out="$out ${blue}git:($git_state$blue)$off"
+
+# Split the context into what Claude Code loaded before the first prompt
+# (system, tools, MCP, agents, skills, memory) and what the conversation has
+# spent since. The breakdown /context shows is internal and never reaches here.
+if [ "${total:-0}" -gt 0 ] && [ -n "$transcript" ]; then
+    # First non-sidechain reply; head closes the pipe, so file size is moot.
+    base=$(jq -r 'select(.type == "assistant" and .isSidechain != true
+                         and .message.usage != null)
+                  | .message.usage
+                  | .input_tokens + .cache_creation_input_tokens
+                    + .cache_read_input_tokens' "$transcript" 2>/dev/null |
+        head -n1)
+    out="$out  $(awk -v base="${base:-0}" -v total="$total" -v o="$off" \
+        -v g="$green" -v y="$yellow" '
+        function tok(n) {
+            if (n >= 1000000) return sprintf("%.1fM", n / 1000000)
+            if (n >= 1000)    return sprintf("%dk", int(n / 1000))
+            return sprintf("%d", n)
+        }
+        BEGIN {
+            conv = total - base
+            if (base == 0 || conv < 0) { base = total; conv = 0 }
+            printf "%sctx%s %s+%s%s%s", g, o, tok(base), y, tok(conv), o
+        }')"
+fi
+
+[ -n "$five" ] && out="$out  $(printf '%s5h%s %.0f%%' "$green" "$off" "$five")"
+
+printf '%s\n' "$out"

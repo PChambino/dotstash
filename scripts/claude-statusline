@@ -12,15 +12,20 @@ esc=$(printf '\033')
 red="$esc[31m"; green="$esc[32m"; yellow="$esc[33m"
 blue="$esc[34m"; cyan="$esc[36m"; off="$esc[0m"
 
+# The last line is the rate_limits payload, stamped and compacted for the cache
+# below; every other line is a scalar we print.
 fields=$(jq -r '
     .cwd // "",
     (.workspace.repo.name // ""),
     (.workspace.git_worktree // ""),
     .transcript_path // "",
     (.context_window.total_input_tokens // 0),
-    (.rate_limits.five_hour.used_percentage // "")
+    (.rate_limits.five_hour.used_percentage // ""),
+    (if .rate_limits then
+        {captured_at: (now | floor), session_id: .session_id} + .rate_limits | tojson
+     else "" end)
 ' 2>/dev/null)
-cwd= repo= worktree= transcript= total=0 five=
+cwd= repo= worktree= transcript= total=0 five= limits=
 {
     read -r cwd
     read -r repo
@@ -28,9 +33,25 @@ cwd= repo= worktree= transcript= total=0 five=
     read -r transcript
     read -r total
     read -r five
+    read -r limits
 } <<EOF
 $fields
 EOF
+
+# Claude Code hands the rate limits to this command and nowhere else, so this is
+# the only place they can be captured for anything outside the status line (see
+# claude-usage). Temp file so a reader never sees a half-written object; sessions
+# race, but the limits are account-wide, so the last write is just as true.
+if [ -n "$limits" ]; then
+    dir=${XDG_CACHE_HOME:-$HOME/.cache}/claude
+    [ -d "$dir" ] || mkdir -p "$dir"
+    tmp=$dir/rate-limits.json.$$
+    if printf '%s\n' "$limits" >"$tmp" 2>/dev/null; then
+        mv -f "$tmp" "$dir/rate-limits.json" 2>/dev/null || rm -f "$tmp"
+    else
+        rm -f "$tmp"
+    fi
+fi
 
 # The repo name beats basename $cwd, which is whatever subdirectory we're in.
 name=${repo:-$(basename "$cwd")}

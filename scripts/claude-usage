@@ -1,0 +1,160 @@
+#!/bin/sh
+# Claude's 5h and weekly rate-limit usage. claude-statusline caches what Claude
+# Code hands it on stdin, the only place these numbers surface; the OpenUsage app
+# is the fallback for when that cache is missing or stale.
+#
+#   claude-usage              meters
+#   claude-usage --json       machine-readable
+#   claude-usage --openusage  skip the cache
+#   claude-usage --cache      skip the fallback
+
+set -u
+
+CACHE=${XDG_CACHE_HOME:-$HOME/.cache}/claude/rate-limits.json
+OPENUSAGE=${OPENUSAGE:-/Applications/OpenUsage.app/Contents/Helpers/openusage}
+STALE_SECONDS=${CLAUDE_USAGE_STALE_SECONDS:-900}
+
+json=false source=auto
+for arg in "$@"; do
+    case $arg in
+        --json)      json=true ;;
+        --openusage) source=openusage ;;
+        --cache)     source=cache ;;
+        -h|--help)   sed -n '2,9p' "$0" | cut -c3- ; exit 0 ;;
+        *)           echo "claude-usage: unknown option $arg" >&2 ; exit 2 ;;
+    esac
+done
+
+# Both sources normalise to these two windows and nothing else. OpenUsage also
+# reports a Fable allowance, which Claude Code has no counterpart for.
+COMMON='
+def reset($at):
+    if $at then {
+        resets_at: $at,
+        resets_in_seconds: ($at - now | floor),
+        resets_local: ($at | strflocaltime("%a %H:%M"))
+    } else {resets_at: null, resets_in_seconds: null, resets_local: null} end;
+def meter($label): {label: $label, used_percent: .used_percent} + reset(.at);
+def windows(five; seven):
+    (if five then {five_hour: (five | meter("5h"))} else {} end)
+  + (if seven then {seven_day: (seven | meter("7d"))} else {} end);
+'
+
+read_cache() {
+    [ -r "$CACHE" ] || return 1
+    jq -e "$COMMON"'
+        def line: if . then {used_percent: .used_percentage, at: .resets_at} else null end;
+        {
+            source: "statusline",
+            captured_at: .captured_at,
+            age_seconds: (now - .captured_at | floor),
+            limits: windows(.five_hour | line; .seven_day | line)
+        }
+        | select(.limits != {})
+    ' "$CACHE" 2>/dev/null
+}
+
+read_openusage() {
+    [ -x "$OPENUSAGE" ] || return 1
+    "$OPENUSAGE" claude 2>/dev/null | jq -e "$COMMON"'
+        # The stamps carry milliseconds, which fromdateiso8601 will not take.
+        def epoch: if . then sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601 else null end;
+        def line: if . then {used_percent: .used, at: (.resetsAt | epoch)} else null end;
+        .providers.claude
+        | select(. != null)
+        | (.fetchedAt | epoch) as $fetched
+        | {
+            source: "openusage",
+            captured_at: $fetched,
+            age_seconds: (now - $fetched | floor),
+            limits: windows(.resources.session | line; .resources.weekly | line)
+        }
+        | select(.limits != {})
+    ' 2>/dev/null
+}
+
+case $source in
+    cache)     data=$(read_cache) ;;
+    openusage) data=$(read_openusage) ;;
+    auto)
+        # Falling back on a stale cache matters more than on a missing one: a
+        # reading that looks healthy but predates the last hour of work is the
+        # failure mode worth a subprocess to avoid.
+        data=$(read_cache)
+        if [ -z "$data" ] ||
+           [ "$(printf '%s' "$data" | jq -r '.age_seconds')" -gt "$STALE_SECONDS" ]; then
+            fresh=$(read_openusage)
+            [ -n "$fresh" ] && data=$fresh
+        fi
+        ;;
+esac
+
+if [ -z "$data" ]; then
+    echo "claude-usage: no rate limits available." >&2
+    echo "  cache:     $CACHE" >&2
+    echo "  openusage: $OPENUSAGE" >&2
+    echo "The cache appears once a Claude Code session renders its status line." >&2
+    exit 1
+fi
+
+if $json; then
+    printf '%s\n' "$data" | jq .
+    exit 0
+fi
+
+colour=1
+[ -t 1 ] || colour=0
+[ -n "${NO_COLOR:-}" ] && colour=0
+
+printf '%s' "$data" | jq -r '
+    [.source, (.age_seconds | tostring)],
+    (.limits | to_entries[] | [
+        .value.label,
+        (.value.used_percent | tostring),
+        (.value.resets_local // ""),
+        (.value.resets_in_seconds | tostring)
+    ])
+    | @tsv
+' | awk -F'\t' -v colour="$colour" -v stale="$STALE_SECONDS" '
+    function paint(code, text) {
+        return colour ? "\033[" code "m" text "\033[0m" : text
+    }
+    # 45m, 2h 5m, 3d 4h.
+    function delta(seconds,   m, h, d) {
+        m = int((seconds + 30) / 60)
+        if (m < 60) return m "m"
+        h = int(m / 60); m = m % 60
+        if (h < 24) return m ? h "h " m "m" : h "h"
+        d = int(h / 24); h = h % 24
+        return h ? d "d " h "h" : d "d"
+    }
+    # Repeated, not truncated with "%.*s": the glyphs are three bytes each and
+    # awk counts a precision in bytes.
+    function repeat(glyph, n,   s, i) {
+        for (i = 0; i < n; i++) s = s glyph
+        return s
+    }
+    NR == 1 {
+        note = "via " $1 ", " delta($2) " old"
+        # A stale reading is the failure mode that looks like a healthy answer,
+        # so it gets shouted rather than dimmed.
+        if ($2 > stale) note = paint("33", note " -- stale")
+        else            note = paint("2", note)
+        print paint("36", "Claude") "  " note
+        next
+    }
+    { label[NR] = $1; used[NR] = $2 + 0; local[NR] = $3; in_[NR] = $4; rows = NR }
+    END {
+        for (i = 2; i <= rows; i++) {
+            filled = int(used[i] / 100 * 20 + 0.5)
+            if (used[i] < 60)      code = "32"
+            else if (used[i] < 85) code = "33"
+            else                   code = "31"
+            bar = paint(code, repeat("█", filled)) paint("2", repeat("░", 20 - filled))
+            row = sprintf("  %s  %3.0f%%  %s", label[i], used[i], bar)
+            if (local[i] != "")
+                row = row paint("2", "  resets " local[i] " (in " delta(in_[i]) ")")
+            print row
+        }
+    }
+'

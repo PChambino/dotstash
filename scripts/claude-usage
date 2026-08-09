@@ -1,7 +1,8 @@
 #!/bin/sh
-# Claude's 5h and weekly rate-limit usage. claude-statusline caches what Claude
-# Code hands it on stdin, the only place these numbers surface; the OpenUsage app
-# is the fallback for when that cache is missing or stale.
+# Claude's 5h and weekly rate-limit usage, and where each window is projected to
+# land by the time it resets. claude-statusline caches what Claude Code hands it on
+# stdin, the only place these numbers surface; the OpenUsage app is the fallback for
+# when that cache is missing or stale.
 #
 #   claude-usage              meters
 #   claude-usage --json       machine-readable
@@ -20,7 +21,7 @@ for arg in "$@"; do
         --json)      json=true ;;
         --openusage) source=openusage ;;
         --cache)     source=cache ;;
-        -h|--help)   sed -n '2,9p' "$0" | cut -c3- ; exit 0 ;;
+        -h|--help)   sed -n '2,10p' "$0" | cut -c3- ; exit 0 ;;
         *)           echo "claude-usage: unknown option $arg" >&2 ; exit 2 ;;
     esac
 done
@@ -31,13 +32,62 @@ COMMON='
 def reset($at):
     if $at then {
         resets_at: $at,
-        resets_in_seconds: ($at - now | floor),
+        # Clamped: a stale enough sample puts the reset in the past, and "in -9m"
+        # is not a thing.
+        resets_in_seconds: ($at - now | if . < 0 then 0 else . end | floor),
         resets_local: ($at | strflocaltime("%a %H:%M"))
     } else {resets_at: null, resets_in_seconds: null, resets_local: null} end;
-def meter($label): {label: $label, used_percent: .used_percent} + reset(.at);
-def windows(five; seven):
-    (if five then {five_hour: (five | meter("5h"))} else {} end)
-  + (if seven then {seven_day: (seven | meter("7d"))} else {} end);
+
+# Where the window lands if the pace so far holds. A window starts $window before
+# it resets, so one sample is enough to know how much of it has gone.
+#
+# Elapsed is measured at $captured, not now: anchoring on now would count the time
+# a stale sample sat in the cache as time spent burning, which deflates the pace
+# and makes an old reading look safer than it is.
+def pace($used; $window; $at; $captured):
+    (if $at == null or $captured == null then null
+     else $window - ($at - $captured)
+        | if . < 0 then 0 elif . > $window then $window else . end
+     end) as $elapsed
+    | (if $elapsed == null then null else $elapsed / $window end) as $frac
+    # Early on, the projection explodes -- 1% used at 2% elapsed reads as 50% -- and
+    # once $at is behind us the sample describes a window that has already rolled
+    # over. Both suppress rather than mislead. ($at null compares low, so it lands
+    # here too.)
+    | if $used == null or $frac == null or $frac < 0.1 or $at <= now then {
+        projected_percent: null,
+        spare_percent: null,
+        elapsed_fraction: $frac,
+        percent_per_hour: null,
+        seconds_to_cap: null,
+        hits_cap_before_reset: null
+      } else
+        ($used / $frac) as $projected
+        | ($used / ($elapsed / 3600)) as $rate
+        # Time to 100% runs from $captured like everything else here, then is
+        # rebased on now so the ETA is actionable rather than historical.
+        | (if $rate > 0 then (100 - $used) / $rate * 3600 - (now - $captured)
+           else null end) as $cap
+        | {
+            projected_percent: ($projected * 10 | round / 10),
+            spare_percent: ((100 - $projected) * 10 | round / 10),
+            elapsed_fraction: ($frac * 1000 | round / 1000),
+            percent_per_hour: ($rate * 10 | round / 10),
+            seconds_to_cap: (if $cap == null then null
+                             else $cap | if . < 0 then 0 else . end | floor end),
+            # Reaching 100% before the reset is algebraically just projecting past
+            # it, so test that directly instead of comparing two anchored times.
+            hits_cap_before_reset: ($projected > 100)
+        }
+      end;
+
+def meter($label; $window; $captured):
+    {label: $label, used_percent: .used_percent}
+    + reset(.at)
+    + pace(.used_percent; $window; .at; $captured);
+def windows($captured; five; seven):
+    (if five then {five_hour: (five | meter("5h"; 18000; $captured))} else {} end)
+  + (if seven then {seven_day: (seven | meter("7d"; 604800; $captured))} else {} end);
 '
 
 read_cache() {
@@ -48,7 +98,7 @@ read_cache() {
             source: "statusline",
             captured_at: .captured_at,
             age_seconds: (now - .captured_at | floor),
-            limits: windows(.five_hour | line; .seven_day | line)
+            limits: windows(.captured_at; .five_hour | line; .seven_day | line)
         }
         | select(.limits != {})
     ' "$CACHE" 2>/dev/null
@@ -67,7 +117,7 @@ read_openusage() {
             source: "openusage",
             captured_at: $fetched,
             age_seconds: (now - $fetched | floor),
-            limits: windows(.resources.session | line; .resources.weekly | line)
+            limits: windows($fetched; .resources.session | line; .resources.weekly | line)
         }
         | select(.limits != {})
     ' 2>/dev/null
@@ -108,11 +158,16 @@ colour=1
 
 printf '%s' "$data" | jq -r '
     [.source, (.age_seconds | tostring)],
-    (.limits | to_entries[] | [
-        .value.label,
-        (.value.used_percent | tostring),
-        (.value.resets_local // ""),
-        (.value.resets_in_seconds | tostring)
+    (.limits | to_entries[] | .value | [
+        .label,
+        (.used_percent | tostring),
+        (.resets_local // ""),
+        (.resets_in_seconds | tostring),
+        # Empty rather than "null" for the suppressed cases, so awk can just test
+        # for a value. 0 survives //, false does not, hence the explicit if.
+        (.projected_percent // "" | tostring),
+        (.seconds_to_cap // "" | tostring),
+        (if .hits_cap_before_reset then "1" else "" end)
     ])
     | @tsv
 ' | awk -F'\t' -v colour="$colour" -v stale="$STALE_SECONDS" '
@@ -128,12 +183,6 @@ printf '%s' "$data" | jq -r '
         d = int(h / 24); h = h % 24
         return h ? d "d " h "h" : d "d"
     }
-    # Repeated, not truncated with "%.*s": the glyphs are three bytes each and
-    # awk counts a precision in bytes.
-    function repeat(glyph, n,   s, i) {
-        for (i = 0; i < n; i++) s = s glyph
-        return s
-    }
     NR == 1 {
         note = "via " $1 ", " delta($2) " old"
         # A stale reading is the failure mode that looks like a healthy answer,
@@ -143,17 +192,37 @@ printf '%s' "$data" | jq -r '
         print paint("36", "Claude") "  " note
         next
     }
-    { label[NR] = $1; used[NR] = $2 + 0; local[NR] = $3; in_[NR] = $4; rows = NR }
+    { label[NR] = $1; used[NR] = $2 + 0
+      proj[NR] = $5; cap[NR] = $6 + 0; hits[NR] = ($7 == "1"); rows = NR
+      # Kept as plain text and measured, so the projections after it can start at
+      # one column: the reset times differ in width ("in 58m" against "in 2h 48m").
+      if ($3 != "") {
+          when[NR] = "resets " $3 " (in " delta($4) ")"
+          if (length(when[NR]) > width) width = length(when[NR])
+      }
+    }
     END {
         for (i = 2; i <= rows; i++) {
-            filled = int(used[i] / 100 * 20 + 0.5)
+            # The percentage carries the traffic light the bar used to.
             if (used[i] < 60)      code = "32"
             else if (used[i] < 85) code = "33"
             else                   code = "31"
-            bar = paint(code, repeat("█", filled)) paint("2", repeat("░", 20 - filled))
-            row = sprintf("  %s  %3.0f%%  %s", label[i], used[i], bar)
-            if (local[i] != "")
-                row = row paint("2", "  resets " local[i] " (in " delta(in_[i]) ")")
+            row = "  " label[i] "  " paint(code, sprintf("%3.0f%%", used[i]))
+            if (when[i] != "") {
+                # Padded only when something follows, to keep the line free of
+                # trailing whitespace otherwise.
+                if (proj[i] != "") when[i] = sprintf("%-" width "s", when[i])
+                row = row "  " paint("2", when[i])
+            }
+            if (proj[i] != "") {
+                # Heading past the cap is the case that changes a decision, so it
+                # gets the ETA and the colour.
+                if (hits[i])
+                    row = row paint("31", sprintf("  → ~%.0f%%, cap in %s",
+                                                  proj[i] + 0, delta(cap[i])))
+                else
+                    row = row paint("2", sprintf("  → ~%.0f%% at reset", proj[i] + 0))
+            }
             print row
         }
     }

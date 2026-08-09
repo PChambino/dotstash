@@ -1,13 +1,12 @@
 #!/bin/sh
-# Claude's 5h and weekly rate-limit usage, and where each window is projected to
-# land by the time it resets. claude-statusline caches what Claude Code hands it on
-# stdin, the only place these numbers surface; the OpenUsage app is the fallback for
-# when that cache is missing or stale.
+# Claude's 5h and weekly rate-limit usage, and where each window is heading.
 #
-#   claude-usage              meters
-#   claude-usage --json       machine-readable
-#   claude-usage --openusage  skip the cache
-#   claude-usage --cache      skip the fallback
+#   -j, --json        machine-readable
+#   -o, --openusage   use openusage helper
+#   -s, --statusline  use statusline cache
+#
+# Reads the cache claude-statusline writes -- Claude Code surfaces these numbers
+# nowhere else -- falling back to the OpenUsage app when it is missing or stale.
 
 set -u
 
@@ -18,11 +17,11 @@ STALE_SECONDS=${CLAUDE_USAGE_STALE_SECONDS:-900}
 json=false source=auto
 for arg in "$@"; do
     case $arg in
-        --json)      json=true ;;
-        --openusage) source=openusage ;;
-        --cache)     source=cache ;;
-        -h|--help)   sed -n '2,10p' "$0" | cut -c3- ; exit 0 ;;
-        *)           echo "claude-usage: unknown option $arg" >&2 ; exit 2 ;;
+        -j|--json)       json=true ;;
+        -o|--openusage)  source=openusage ;;
+        -s|--statusline) source=statusline ;;
+        -h|--help)       sed -n '2,6p' "$0" | cut -c3- ; exit 0 ;;
+        *)               echo "claude-usage: unknown option $arg" >&2 ; exit 2 ;;
     esac
 done
 
@@ -90,7 +89,7 @@ def windows($captured; five; seven):
   + (if seven then {seven_day: (seven | meter("7d"; 604800; $captured))} else {} end);
 '
 
-read_cache() {
+read_statusline() {
     [ -r "$CACHE" ] || return 1
     jq -e "$COMMON"'
         def line: if . then {used_percent: .used_percentage, at: .resets_at} else null end;
@@ -124,13 +123,13 @@ read_openusage() {
 }
 
 case $source in
-    cache)     data=$(read_cache) ;;
-    openusage) data=$(read_openusage) ;;
+    statusline) data=$(read_statusline) ;;
+    openusage)  data=$(read_openusage) ;;
     auto)
         # Falling back on a stale cache matters more than on a missing one: a
         # reading that looks healthy but predates the last hour of work is the
         # failure mode worth a subprocess to avoid.
-        data=$(read_cache)
+        data=$(read_statusline)
         if [ -z "$data" ] ||
            [ "$(printf '%s' "$data" | jq -r '.age_seconds')" -gt "$STALE_SECONDS" ]; then
             fresh=$(read_openusage)
@@ -141,8 +140,8 @@ esac
 
 if [ -z "$data" ]; then
     echo "claude-usage: no rate limits available." >&2
-    echo "  cache:     $CACHE" >&2
-    echo "  openusage: $OPENUSAGE" >&2
+    echo "  statusline: $CACHE" >&2
+    echo "  openusage:  $OPENUSAGE" >&2
     echo "The cache appears once a Claude Code session renders its status line." >&2
     exit 1
 fi

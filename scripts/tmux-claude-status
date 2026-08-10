@@ -1,0 +1,112 @@
+#!/bin/sh
+# tmux window indicators for the Claude sessions running inside them.
+#   1:carwow-airflow  2:carwow-terraflake ●  4:.dotstash ●●
+#
+# cctop writes one ~/.cctop/sessions/<pid>.json per Claude process, recording
+# terminal.multiplexer.pane_id for the tmux-hosted ones, so this is a join of
+# those files against `list-panes`, grouped per window. One dot per session,
+# each coloured by that session's own status.
+#
+# Colours are cctop's own, lifted from ~/.cctop/display-state.json, which keys
+# them by status. Terminal.app has no truecolor, but tmux maps hex to the
+# nearest 256-colour, so these stay exact under a terminal that does.
+#
+# Run for its side effects from status-right's #(): it sets @claude_status per
+# window, and window-status-format reads it back. Options set while a format is
+# expanding land one redraw late, hence the trailing refresh-client; that redraw
+# reuses the cached #() output, so it can't loop.
+
+set -u
+
+sessions=${CCTOP_SESSIONS:-$HOME/.cctop/sessions}
+[ -d "$sessions" ] || exit 0
+
+# $TMUX is "<socket>,<pid>,<session>", and the socket is what tells this server
+# apart from any other one a session file might have been written under.
+socket=${TMUX:-}
+socket=${socket%%,*}
+[ -n "$socket" ] || exit 0
+
+tab=$(printf '\t')
+
+changed=$(
+    {
+        # Current values, and the authoritative window list.
+        tmux list-windows -a -F "W$tab#{window_id}$tab#{@claude_status}"
+        tmux list-panes -a -F "P$tab#{pane_id}$tab#{window_id}"
+        # A session file outlives its process when Claude is SIGKILLed, so
+        # liveness needs checking rather than trusting ended_at.
+        ps -eo pid= | awk -v t="$tab" '{print "L" t $1}'
+        # -mmin prunes hundreds of long-dead sessions that jq would otherwise
+        # reparse on every status-interval. -exec {} + rather than xargs: with
+        # no matches, xargs would run jq with no file arguments and hang on
+        # stdin, whereas -exec is simply never invoked.
+        #
+        # Sorted by pane number so a window's dots keep a stable order and
+        # don't reshuffle as sessions change state.
+        find "$sessions" -name '*.json' -mmin -10080 -exec jq -r --arg sock "$socket" '
+            select(.terminal.multiplexer.name? == "tmux")
+            | select(.terminal.multiplexer.socket == $sock)
+            | select(.ended_at == null and .disconnected_at == null)
+            | select(.hidden != true)
+            | ["S", .terminal.multiplexer.pane_id, (.status // "idle"),
+               (.pid | tostring), (.last_activity // "")]
+            | @tsv
+        ' {} + 2>/dev/null | sort -t"$tab" -k2.2n
+    } | awk -F"$tab" -v OFS="$tab" '
+        BEGIN {
+            dot = "●"
+            # Working and compacting stay uncoloured; idle and the two states
+            # wanting a human take cctop'"'"'s greys and terracotta.
+            colour["working"] = "#[default]"
+            colour["compacting"] = "#[default]"
+            colour["idle"] = "#[fg=#B1ADA1]"
+            colour["waiting_input"] = "#[fg=#C15F3C]"
+            colour["error"] = "#[fg=#C15F3C]"
+        }
+
+        $1 == "W" { win[$2]; current[$2] = $3; next }
+        $1 == "P" { pane2win[$2] = $3; next }
+        $1 == "L" { live[$2]; next }
+
+        $1 == "S" {
+            pane = $2; state = $3; pid = $4; activity = $5
+            if (!(pid in live) || !(pane in pane2win)) next
+            if (!(state in colour)) state = "idle"
+            # A pane accumulates a session file per Claude run; the freshest
+            # surviving one is the session actually sitting there now.
+            if (pane in seen) {
+                if (seen[pane] >= activity) next
+            } else {
+                panes[++npanes] = pane
+            }
+            seen[pane] = activity
+            state_of[pane] = state
+            next
+        }
+
+        END {
+            for (i = 1; i <= npanes; i++) {
+                pane = panes[i]
+                w = pane2win[pane]
+                dots[w] = dots[w] colour[state_of[pane]] dot
+            }
+            for (w in win) {
+                text = (w in dots) ? " " dots[w] : ""
+                if (text != current[w]) print w, text
+            }
+        }
+    '
+)
+
+[ -n "$changed" ] || exit 0
+
+printf '%s\n' "$changed" | while IFS="$tab" read -r win text; do
+    if [ -n "$text" ]; then
+        tmux set -w -t "$win" @claude_status "$text"
+    else
+        tmux set -uw -t "$win" @claude_status
+    fi
+done
+
+tmux refresh-client -S

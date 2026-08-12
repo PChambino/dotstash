@@ -1,10 +1,10 @@
 #!/bin/sh
 # tmux window indicators for the Claude sessions running inside them.
-#   1:carwow-airflow  2:carwow-terraflake ●  4:.dotstash ●●
+#   1:carwow-airflow 2:carwow-terraflake▪ 4:.dotstash▪▪
 #
 # cctop writes one ~/.cctop/sessions/<pid>.json per Claude process, recording
 # terminal.multiplexer.pane_id for the tmux-hosted ones, so this is a join of
-# those files against `list-panes`, grouped per window. One dot per session,
+# those files against `list-panes`, grouped per window. One mark per session,
 # each coloured by that session's own status.
 #
 # Colours are cctop's own, lifted from ~/.cctop/display-state.json, which keys
@@ -42,7 +42,7 @@ changed=$(
         # no matches, xargs would run jq with no file arguments and hang on
         # stdin, whereas -exec is simply never invoked.
         #
-        # Sorted by pane number so a window's dots keep a stable order and
+        # Sorted by pane number so a window's marks keep a stable order and
         # don't reshuffle as sessions change state.
         find "$sessions" -name '*.json' -mmin -10080 -exec jq -r --arg sock "$socket" '
             select(.terminal.multiplexer.name? == "tmux")
@@ -55,7 +55,7 @@ changed=$(
         ' {} + 2>/dev/null | sort -t"$tab" -k2.2n
     } | awk -F"$tab" -v OFS="$tab" '
         BEGIN {
-            dot = "●"
+            mark = "▪"
             # Working and compacting stay uncoloured; idle and the two states
             # wanting a human take cctop'"'"'s greys and terracotta.
             colour["working"] = "#[default]"
@@ -89,10 +89,10 @@ changed=$(
             for (i = 1; i <= npanes; i++) {
                 pane = panes[i]
                 w = pane2win[pane]
-                dots[w] = dots[w] colour[state_of[pane]] dot
+                marks[w] = marks[w] colour[state_of[pane]] mark
             }
             for (w in win) {
-                text = (w in dots) ? " " dots[w] : ""
+                text = (w in marks) ? marks[w] : ""
                 if (text != current[w]) print w, text
             }
         }

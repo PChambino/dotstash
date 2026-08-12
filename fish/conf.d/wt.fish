@@ -12,7 +12,8 @@ function __wt_complete -d "Worktree completions for wt, newest first"
 end
 
 complete -c wt -x -k -a '(__wt_complete)'
-complete -c wt -s p -l pick -d 'Pick a worktree with fzf'
 complete -c wt -s l -l list -d 'List worktrees, newest first'
 complete -c wt -s m -l main -d 'cd to the main checkout'
+complete -c wt -s p -l pick -d 'Pick a worktree with fzf'
+complete -c wt -l prune -d 'Remove worktrees idle longer than <days> (default 30)'
 complete -c wt -s h -l help -d 'Display help and exit'

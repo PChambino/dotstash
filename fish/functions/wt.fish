@@ -2,19 +2,19 @@
 # Driven by `git worktree list`, so .worktrees/ and .claude/worktrees/ both
 # just work, in any repo, from anywhere inside it.
 function wt -d "cd to a git worktree, newest first"
-    argparse -X 1 h/help l/list m/main p/pick -- $argv
+    argparse -X 1 h/help l/list m/main p/pick prune -- $argv
     or return 1
 
     if set -q _flag_help
         printf '%s\n' \
-            'wt              cd to the newest worktree, or back to the main' \
-            '                checkout if already inside one' \
+            'wt              cd to the newest worktree, or back out to the main checkout' \
             'wt <name>       cd to the newest worktree matching <name>' \
             'wt -            cd to the previous directory, as `cd -`' \
+            'wt -l           list worktrees, newest first' \
+            'wt -m           cd to the main checkout' \
             'wt -p           pick a worktree with fzf' \
             'wt -p <name>    page that worktree'\''s preview; <name> may be a path' \
-            'wt -l           list worktrees, newest first' \
-            'wt -m           cd to the main checkout'
+            'wt --prune [n]  remove worktrees idle over n days (default 30), branches kept'
         return 0
     end
 
@@ -43,6 +43,11 @@ function wt -d "cd to a git worktree, newest first"
 
     if set -q _flag_main
         cd $main
+        return
+    end
+
+    if set -q _flag_prune
+        __wt_prune $main $argv
         return
     end
 
@@ -117,4 +122,80 @@ function wt -d "cd to a git worktree, newest first"
         return
     end
     cd $target
+end
+
+# Backs `wt --prune`. Only the checkouts go: the branches stay, so anything
+# committed is still reachable by name, and that is what makes a bare `y` safe.
+#
+# Idle is the newer of the worktree's birth and its last commit. Directory mtime
+# would be no use — a background build touches it — and last commit alone would
+# sweep a worktree created today off an ancient branch.
+function __wt_prune -d "Remove worktrees idle longer than <days>"
+    set -l main $argv[1]
+    set -l days 30
+    set -q argv[2]
+    and set days $argv[2]
+    if not string match -qr '^\d+$' -- $days
+        echo "wt: --prune wants a number of days, not '$days'" >&2
+        return 1
+    end
+
+    set -l rows (wt-list)
+    or begin
+        echo "wt: no worktrees in "(basename $main) >&2
+        return 1
+    end
+
+    set -l now (date +%s)
+    set -l cutoff (math "$now - $days * 86400")
+    set -l paths
+    set -l lines
+
+    for row in $rows
+        set -l f (string split \t -- $row)
+        set -l idle $f[1]
+        set -l last (git -C $f[2] log -1 --format=%ct 2>/dev/null)
+        if test -n "$last"; and test $last -gt $idle
+            set idle $last
+        end
+        test $idle -lt $cutoff
+        or continue
+
+        # Uncommitted work goes too, but not without saying so first.
+        set -l tag ""
+        if test (git -C $f[2] status --porcelain 2>/dev/null | count) -gt 0
+            set tag "  "(set_color yellow)uncommitted(set_color normal)
+        end
+
+        set -a paths $f[2]
+        set -a lines (printf '  %-50s %4dd ago' $f[3] (math "floor(($now - $idle) / 86400)"))"$tag"
+    end
+
+    if not set -q paths[1]
+        echo "wt: nothing idle longer than $days days"
+        return 0
+    end
+
+    printf '%s\n' $lines
+    read -l -P "remove "(count $paths)" worktree(s), keeping their branches? [y/N] " reply
+    or return 1
+    string match -qr '^[yY]' -- $reply
+    or return 1
+
+    set -l gone 0
+    for path in $paths
+        git -C $main worktree remove --force $path
+        or continue
+        set gone (math $gone + 1)
+        # A nested id such as source/finance-mi leaves its parent behind. rmdir
+        # takes it once the last child goes, and refuses harmlessly until then.
+        # The two containers themselves stay put, empty or not.
+        set -l parent (dirname $path)
+        if not contains -- $parent $main $main/.worktrees $main/.claude/worktrees
+            rmdir $parent 2>/dev/null
+        end
+    end
+
+    git -C $main worktree prune
+    echo "removed $gone worktree(s)"
 end

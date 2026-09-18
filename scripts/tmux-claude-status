@@ -25,23 +25,49 @@ error #[fg=red]'
 
 # working keeps #[default] so the mark stays legible on the current window,
 # whose style is bg=green: an explicit green there would be green on green.
+# Hence two swatches, each drawn on the background it is really painted on,
+# with the styles read back rather than assumed.
 if [ "${1:-}" = --colours ]; then
-    printf '%s\n' "$palette" | awk '
+    awk -v bar="$(tmux show -gv status-style 2>/dev/null)" \
+        -v cur="$(tmux show -gv window-status-current-style 2>/dev/null)" '
+        function idx(name,   b) {
+            b = 0
+            if (name ~ /^bright/) { name = substr(name, 7); b = 8 }
+            return (name in base) ? base[name] + b : -1
+        }
+        function fg(name,   i) { i = idx(name); return i < 0 ? 39 : (i < 8 ? 30 + i : 82 + i) }
+        function bg(name,   i) { i = idx(name); return i < 0 ? 49 : (i < 8 ? 40 + i : 92 + i) }
+        function part(style, key,   n, kv, i) {
+            n = split(style, kv, ",")
+            for (i = 1; i <= n; i++)
+                if (index(kv[i], key "=") == 1) return substr(kv[i], length(key) + 2)
+            return ""
+        }
+        function cell(b, f) { return esc "[" b ";" f "m ▪▪▪ " off }
         BEGIN {
             esc = sprintf("%c", 27); off = esc "[0m"
-            n = split("green 32 cyan 36 white 37 yellow 33 red 31", a, " ")
-            for (i = 1; i < n; i += 2) sgr[a[i]] = a[i + 1]
+            n = split("black 0 red 1 green 2 yellow 3 blue 4 magenta 5 cyan 6 white 7", a, " ")
+            for (i = 1; i < n; i += 2) base[a[i]] = a[i + 1]
+
+            barbg = bg(part(bar, "bg")); barfg = fg(part(bar, "fg"))
+            curbg = bg(part(cur, "bg")); curfg = fg(part(cur, "fg"))
+
             print "tmux window marks"
+            printf "  left   status-style                 %s\n", bar
+            printf "  right  window-status-current-style  %s\n\n", cur
         }
         $2 == "#[default]" {
-            printf "  %s  %-19s %-14s %s\n", "▪▪▪", $1, $2, "status bar fg"
+            printf "  %-19s %-13s %s%s  inherits the fg\n",
+                $1, $2, cell(barbg, barfg), cell(curbg, curfg)
             next
         }
         {
             name = substr($2, 6, length($2) - 6)
-            printf "  %s▪▪▪%s  %-19s %-14s SGR %s\n",
-                esc "[" sgr[name] "m", off, $1, $2, sgr[name]
-        }'
+            printf "  %-19s %-13s %s%s  SGR %d\n",
+                $1, $2, cell(barbg, fg(name)), cell(curbg, fg(name)), fg(name)
+        }' <<PALETTE
+$palette
+PALETTE
     exit 0
 fi
 

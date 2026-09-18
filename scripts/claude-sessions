@@ -1,0 +1,80 @@
+#!/bin/sh
+# One line per live Claude session in this tmux server, tab separated:
+#   session_id  project_path  branch  status  last_activity
+#   tmux_session  window_id  window_index  window_name  pane_id  last_prompt
+#
+# A join of cctop's ~/.cctop/sessions/<pid>.json against `list-panes`, ordered
+# by window then pane. Those files are keyed by pid, so they say nothing after
+# a reboot; --snapshot keeps a copy on disk, which is what `cs -r` reopens from.
+
+set -u
+
+sessions=${CCTOP_SESSIONS:-$HOME/.cctop/sessions}
+snapshot=${CLAUDE_SESSIONS_SNAPSHOT:-$HOME/.local/state/claude/sessions.tsv}
+
+save=0
+[ "${1:-}" = --snapshot ] && save=1
+
+[ -d "$sessions" ] || exit 1
+
+# $TMUX is "<socket>,<pid>,<session>"; the socket identifies this server.
+socket=${TMUX:-}
+socket=${socket%%,*}
+[ -n "$socket" ] || exit 1
+
+tab=$(printf '\t')
+
+rows=$(
+    {
+        tmux list-panes -a -F "P$tab#{pane_id}$tab#{session_name}$tab#{window_id}$tab#{window_index}$tab#{window_name}"
+        # A session file outlives its process when Claude is SIGKILLed.
+        ps -eo pid= | awk -v t="$tab" '{print "L" t $1}'
+        # -mmin prunes hundreds of dead sessions. -exec {} + rather than xargs,
+        # which with no matches would run jq argumentless and hang on stdin.
+        find "$sessions" -name '*.json' -mmin -10080 -exec jq -r --arg sock "$socket" '
+            select(.terminal.multiplexer.name? == "tmux")
+            | select(.terminal.multiplexer.socket == $sock)
+            | select(.ended_at == null and .disconnected_at == null)
+            | select(.hidden != true)
+            | ["S", .terminal.multiplexer.pane_id, .session_id, .project_path,
+               (.branch // ""), (.status // "idle"), (.pid | tostring),
+               (.last_activity // "" | if . == "" then 0
+                else sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601 end | tostring),
+               ((.last_prompt // "") | gsub("\\s+"; " ") | .[0:160])]
+            | @tsv
+        ' {} + 2>/dev/null
+    } | awk -F"$tab" -v OFS="$tab" '
+        $1 == "P" { pane[$2] = $3 OFS $4 OFS $5 OFS $6; next }
+        $1 == "L" { live[$2]; next }
+
+        $1 == "S" {
+            p = $2; sid = $3; path = $4; branch = $5
+            state = $6; pid = $7; act = $8 + 0; prompt = $9
+            if (!(pid in live) || !(p in pane)) next
+            # A pane accumulates a file per run; the freshest is the live one.
+            if (p in seen) {
+                if (seen[p] >= act) next
+            } else {
+                order[++n] = p
+            }
+            seen[p] = act
+            row[p] = sid OFS path OFS branch OFS state OFS act OFS pane[p] OFS p OFS prompt
+        }
+
+        END { for (i = 1; i <= n; i++) print row[order[i]] }
+    ' | sort -t"$tab" -k8,8n -k10.2,10n
+)
+
+[ -n "$rows" ] && printf '%s\n' "$rows"
+
+[ "$save" = 1 ] || exit 0
+
+# Written even when empty; the guards above caught the missing-listing cases.
+mkdir -p "$(dirname "$snapshot")" 2>/dev/null || exit 0
+tmp=$snapshot.$$
+if [ -n "$rows" ]; then
+    printf '%s\n' "$rows" > "$tmp" 2>/dev/null || { rm -f "$tmp"; exit 0; }
+else
+    : > "$tmp" 2>/dev/null || exit 0
+fi
+mv -f "$tmp" "$snapshot" 2>/dev/null || rm -f "$tmp"

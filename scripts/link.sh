@@ -6,6 +6,7 @@ cd `dirname $0`
 mkdir -p ~/.local/bin
 link_file `pwd`/wt-list ~/.local/bin/wt-list
 link_file `pwd`/wt-preview ~/.local/bin/wt-preview
+link_file `pwd`/claude-sessions ~/.local/bin/claude-sessions
 link_file `pwd`/claude-statusline ~/.local/bin/claude-statusline
 link_file `pwd`/claude-usage ~/.local/bin/claude-usage
 link_file `pwd`/tmux-claude-status ~/.local/bin/tmux-claude-status

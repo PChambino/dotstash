@@ -14,24 +14,72 @@ set -u
 
 tab=$(printf '\t')
 
+# The one colour table, shared by the marks below and --colours.
+palette='working #[default]
+compacting #[default]
+idle #[fg=#B1ADA1]
+waiting_input #[fg=#C15F3C]
+waiting_permission #[fg=#DD5353]
+error #[fg=#C15F3C]'
+
+# tmux maps each hex to the nearest 256-colour, so the swatch is drawn with
+# that index rather than truecolor: it is what a terminal without truecolor,
+# Terminal.app included, actually puts on screen.
+if [ "${1:-}" = --colours ]; then
+    printf '%s\n' "$palette" | awk '
+        function hex(s,   i, v) {
+            for (i = 1; i <= length(s); i++)
+                v = v * 16 + index("0123456789abcdef", tolower(substr(s, i, 1))) - 1
+            return v
+        }
+        function near(v,   i, bi, bd, d) {
+            bd = 1e9
+            for (i = 1; i <= 6; i++) {
+                d = v - lev[i]; if (d < 0) d = -d
+                if (d < bd) { bd = d; bi = i }
+            }
+            return bi
+        }
+        function x256(r, g, b,   ri, gi, bi, cd, gi2, gv, gd) {
+            ri = near(r); gi = near(g); bi = near(b)
+            cd = (r - lev[ri])^2 + (g - lev[gi])^2 + (b - lev[bi])^2
+            gi2 = int(((r + g + b) / 3 - 8) / 10 + 0.5)
+            if (gi2 < 0) gi2 = 0
+            if (gi2 > 23) gi2 = 23
+            gv = 8 + 10 * gi2
+            gd = (r - gv)^2 + (g - gv)^2 + (b - gv)^2
+            return gd < cd ? 232 + gi2 : 16 + 36 * (ri - 1) + 6 * (gi - 1) + bi - 1
+        }
+        BEGIN {
+            split("0 95 135 175 215 255", lev, " ")
+            esc = sprintf("%c", 27); off = esc "[0m"
+            print "tmux window marks"
+        }
+        $2 !~ /^#\[fg=#/ {
+            printf "  %s  %-19s %-12s %s\n", "▪▪▪", $1, $2, "status bar fg"
+            next
+        }
+        {
+            h = substr($2, 7, 6)
+            n = x256(hex(substr(h, 1, 2)), hex(substr(h, 3, 2)), hex(substr(h, 5, 2)))
+            printf "  %s▪▪▪%s  %-19s %-12s 256-colour %d\n", esc "[38;5;" n "m", off, $1, "#" h, n
+        }'
+    exit 0
+fi
+
 # Beside this script, wherever it was linked to, rather than on tmux's PATH.
 rows=$("$(dirname "$0")/claude-sessions" --snapshot) || exit 0
 
 changed=$(
     {
+        printf '%s\n' "$palette" | awk -v t="$tab" '{print "C" t $1 t $2}'
         # Every window, so one whose last session just went can be cleared.
         tmux list-windows -a -F "W$tab#{window_id}$tab#{@claude_status}"
         [ -n "$rows" ] && printf '%s\n' "$rows" | awk '{print "S\t" $0}'
     } | awk -F"$tab" -v OFS="$tab" '
-        BEGIN {
-            mark = "▪"
-            colour["working"] = "#[default]"
-            colour["compacting"] = "#[default]"
-            colour["idle"] = "#[fg=#B1ADA1]"
-            colour["waiting_input"] = "#[fg=#C15F3C]"
-            colour["waiting_permission"] = "#[fg=#DD5353]"
-            colour["error"] = "#[fg=#C15F3C]"
-        }
+        BEGIN { mark = "▪" }
+
+        $1 == "C" { colour[$2] = $3; next }
 
         $1 == "W" { win[$2]; current[$2] = $3; next }
 

@@ -3,7 +3,7 @@
 # Live rows come from claude-sessions; after a reboot there are none, and the
 # snapshot tmux-claude-status keeps on an interval is what -r reopens from.
 function cs -d "list, jump to, or reopen Claude sessions"
-    argparse -X 1 h/help p/pick r/restore -- $argv
+    argparse -X 1 h/help p/pick r/restore colours -- $argv
     or return 1
 
     if set -q _flag_help
@@ -13,7 +13,13 @@ function cs -d "list, jump to, or reopen Claude sessions"
             'cs -p           pick a session with fzf, and jump to it' \
             'cs -p <name>    pick among the matching ones' \
             'cs -r           reopen the sessions in the last snapshot' \
-            'cs -r <name>    reopen only the matching ones'
+            'cs -r <name>    reopen only the matching ones' \
+            'cs --colours    show the status colours'
+        return 0
+    end
+
+    if set -q _flag_colours
+        __cs_colours
         return 0
     end
 
@@ -103,26 +109,43 @@ function __cs_match
     printf '%s\n' $hits | sort -t\t -k5,5rn
 end
 
+# status  SGR  label; the one table the listing and --colours share.
+function __cs_palette
+    printf '%s\n' \
+        'working            32 working' \
+        'compacting         36 compacting' \
+        'idle               90 idle' \
+        'waiting_input      33 waiting' \
+        'waiting_permission 31 permission' \
+        'error              31 error'
+end
+
+function __cs_colours
+    echo 'cs status column'
+    __cs_palette | awk '
+        BEGIN { esc = sprintf("%c", 27); off = esc "[0m" }
+        { printf "  %s%-10s%s  %-19s SGR %s\n", esc "[" $2 "m", $3, off, $1, $2 }'
+end
+
 # Rows in, one padded and coloured line each. Every column is cut to fit, the
-# prompt taking whatever width is left over.
+# prompt taking whatever width is left over. The palette rides in ahead of the
+# rows as C records, awk -v not carrying the newlines it would otherwise need.
 function __cs_format
-    awk -F\t -v now=(date +%s) -v cols=$COLUMNS '
+    begin
+        __cs_palette | awk '{print "C\t" $1 "\t" $2 "\t" $3}'
+        cat
+    end | awk -F\t -v now=(date +%s) -v cols=$COLUMNS '
         function fit(s, n) {
             return length(s) > n ? substr(s, 1, n - 1) "…" : s
         }
         BEGIN {
             esc = sprintf("%c", 27); off = esc "[0m"
-            c["working"]            = esc "[32m"
-            c["compacting"]         = esc "[36m"
-            c["idle"]               = esc "[90m"
-            c["waiting_input"]      = esc "[33m"
-            c["waiting_permission"] = esc "[31m"
-            c["error"]              = esc "[31m"
-            label["waiting_input"] = "waiting"
-            label["waiting_permission"] = "permission"
             # COLUMNS is unset when fish is not interactive.
             room = (cols > 0 ? cols : 120) - 86
         }
+
+        $1 == "C" { c[$2] = esc "[" $3 "m"; label[$2] = $4; next }
+
         {
             path = $2; branch = $3; state = $4; act = $5
             widx = $8; wname = $9; prompt = $11

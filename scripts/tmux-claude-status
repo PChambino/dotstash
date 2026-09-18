@@ -18,7 +18,7 @@ tab=$(printf '\t')
 # The one colour table, shared by the marks below and --colours.
 palette='working #[default]
 compacting #[fg=cyan]
-idle #[fg=white]
+idle #[fg=colour248]
 waiting_input #[fg=yellow]
 waiting_permission #[fg=red]
 error #[fg=red]'
@@ -35,8 +35,14 @@ if [ "${1:-}" = --colours ]; then
             if (name ~ /^bright/) { name = substr(name, 7); b = 8 }
             return (name in base) ? base[name] + b : -1
         }
-        function fg(name,   i) { i = idx(name); return i < 0 ? 39 : (i < 8 ? 30 + i : 82 + i) }
-        function bg(name,   i) { i = idx(name); return i < 0 ? 49 : (i < 8 ? 40 + i : 92 + i) }
+        function fg(name,   i) {
+            if (name ~ /^colour[0-9]+$/) return "38;5;" substr(name, 7)
+            i = idx(name); return i < 0 ? 39 : (i < 8 ? 30 + i : 82 + i)
+        }
+        function bg(name,   i) {
+            if (name ~ /^colour[0-9]+$/) return "48;5;" substr(name, 7)
+            i = idx(name); return i < 0 ? 49 : (i < 8 ? 40 + i : 92 + i)
+        }
         function part(style, key,   n, kv, i) {
             n = split(style, kv, ",")
             for (i = 1; i <= n; i++)
@@ -57,13 +63,13 @@ if [ "${1:-}" = --colours ]; then
             printf "  right  window-status-current-style  %s\n\n", cur
         }
         $2 == "#[default]" {
-            printf "  %-19s %-13s %s%s  inherits the fg\n",
+            printf "  %-19s %-17s %s%s  inherits the fg\n",
                 $1, $2, cell(barbg, barfg), cell(curbg, curfg)
             next
         }
         {
             name = substr($2, 6, length($2) - 6)
-            printf "  %-19s %-13s %s%s  SGR %d\n",
+            printf "  %-19s %-17s %s%s  SGR %s\n",
                 $1, $2, cell(barbg, fg(name)), cell(curbg, fg(name)), fg(name)
         }' <<PALETTE
 $palette

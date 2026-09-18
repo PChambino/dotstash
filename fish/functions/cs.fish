@@ -114,7 +114,7 @@ function __cs_palette
     printf '%s\n' \
         'working            32 working' \
         'compacting         36 compacting' \
-        'idle               37 idle' \
+        'idle               38;5;248 idle' \
         'waiting_input      33 waiting' \
         'waiting_permission 31 permission' \
         'error              31 error'
@@ -124,7 +124,7 @@ function __cs_colours
     echo 'cs status column'
     __cs_palette | awk '
         BEGIN { esc = sprintf("%c", 27); off = esc "[0m" }
-        { printf "  %s%-10s%s  %-19s SGR %s\n", esc "[" $2 "m", $3, off, $1, $2 }'
+        { printf "  %-19s %s%-12s%s SGR %s\n", $1, esc "[" $2 "m", $3, off, $2 }'
 end
 
 # Rows in, one padded and coloured line each. Every column is cut to fit, the

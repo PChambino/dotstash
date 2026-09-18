@@ -113,9 +113,9 @@ end
 function __cs_palette
     printf '%s\n' \
         'working            32 working' \
-        'compacting         36 compacting' \
+        'compacting         96 compacting' \
         'idle               38;5;248 idle' \
-        'waiting_input      33 waiting' \
+        'waiting_input      93 waiting' \
         'waiting_permission 31 permission' \
         'error              31 error'
 end

@@ -114,7 +114,7 @@ function __cs_palette
     printf '%s\n' \
         'working            32 working' \
         'compacting         36 compacting' \
-        'idle               90 idle' \
+        'idle               37 idle' \
         'waiting_input      33 waiting' \
         'waiting_permission 31 permission' \
         'error              31 error'
@@ -161,7 +161,7 @@ function __cs_format
             else if (secs < 86400) age = int(secs / 3600) "h"
             else                   age = int(secs / 86400) "d"
 
-            if (!(state in c)) c[state] = esc "[90m"
+            if (!(state in c)) c[state] = c["idle"]
             shown = (state in label) ? label[state] : state
 
             printf "%-24s %-16s %-26s %s%-10s%s %4s  %s\n",

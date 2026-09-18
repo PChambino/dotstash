@@ -2,8 +2,9 @@
 # tmux window indicators for the Claude sessions running inside them.
 #   1:carwow-airflow 2:carwow-terraflake▪ 4:.dotstash▪▪
 #
-# One mark per session from claude-sessions, coloured by that session's status
-# with cctop's own colours from ~/.cctop/display-state.json.
+# One mark per session from claude-sessions, coloured by that session's status.
+# Named colours rather than cctop's hexes, so a mark is the same colour as the
+# same status in cs, and so terminal-overrides' *:RGB cannot come into it.
 #
 # Run for its side effects from status-right's #(): it sets @claude_status per
 # window, and window-status-format reads it back. Options set while a format is
@@ -16,53 +17,30 @@ tab=$(printf '\t')
 
 # The one colour table, shared by the marks below and --colours.
 palette='working #[default]
-compacting #[default]
-idle #[fg=#B1ADA1]
-waiting_input #[fg=#C15F3C]
-waiting_permission #[fg=#DD5353]
-error #[fg=#C15F3C]'
+compacting #[fg=cyan]
+idle #[fg=white]
+waiting_input #[fg=yellow]
+waiting_permission #[fg=red]
+error #[fg=red]'
 
-# tmux maps each hex to the nearest 256-colour, so the swatch is drawn with
-# that index rather than truecolor: it is what a terminal without truecolor,
-# Terminal.app included, actually puts on screen.
+# working keeps #[default] so the mark stays legible on the current window,
+# whose style is bg=green: an explicit green there would be green on green.
 if [ "${1:-}" = --colours ]; then
     printf '%s\n' "$palette" | awk '
-        function hex(s,   i, v) {
-            for (i = 1; i <= length(s); i++)
-                v = v * 16 + index("0123456789abcdef", tolower(substr(s, i, 1))) - 1
-            return v
-        }
-        function near(v,   i, bi, bd, d) {
-            bd = 1e9
-            for (i = 1; i <= 6; i++) {
-                d = v - lev[i]; if (d < 0) d = -d
-                if (d < bd) { bd = d; bi = i }
-            }
-            return bi
-        }
-        function x256(r, g, b,   ri, gi, bi, cd, gi2, gv, gd) {
-            ri = near(r); gi = near(g); bi = near(b)
-            cd = (r - lev[ri])^2 + (g - lev[gi])^2 + (b - lev[bi])^2
-            gi2 = int(((r + g + b) / 3 - 8) / 10 + 0.5)
-            if (gi2 < 0) gi2 = 0
-            if (gi2 > 23) gi2 = 23
-            gv = 8 + 10 * gi2
-            gd = (r - gv)^2 + (g - gv)^2 + (b - gv)^2
-            return gd < cd ? 232 + gi2 : 16 + 36 * (ri - 1) + 6 * (gi - 1) + bi - 1
-        }
         BEGIN {
-            split("0 95 135 175 215 255", lev, " ")
             esc = sprintf("%c", 27); off = esc "[0m"
+            n = split("green 32 cyan 36 white 37 yellow 33 red 31", a, " ")
+            for (i = 1; i < n; i += 2) sgr[a[i]] = a[i + 1]
             print "tmux window marks"
         }
-        $2 !~ /^#\[fg=#/ {
-            printf "  %s  %-19s %-12s %s\n", "▪▪▪", $1, $2, "status bar fg"
+        $2 == "#[default]" {
+            printf "  %s  %-19s %-14s %s\n", "▪▪▪", $1, $2, "status bar fg"
             next
         }
         {
-            h = substr($2, 7, 6)
-            n = x256(hex(substr(h, 1, 2)), hex(substr(h, 3, 2)), hex(substr(h, 5, 2)))
-            printf "  %s▪▪▪%s  %-19s %-12s 256-colour %d\n", esc "[38;5;" n "m", off, $1, "#" h, n
+            name = substr($2, 6, length($2) - 6)
+            printf "  %s▪▪▪%s  %-19s %-14s SGR %s\n",
+                esc "[" sgr[name] "m", off, $1, $2, sgr[name]
         }'
     exit 0
 fi

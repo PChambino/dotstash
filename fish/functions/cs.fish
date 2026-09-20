@@ -12,7 +12,7 @@ function cs -d "list, jump to, or reopen Claude sessions"
             'cs <name>       jump to the pane running the matching session' \
             'cs -p           pick a session with fzf, and jump to it' \
             'cs -p <name>    pick among the matching ones' \
-            'cs -r           reopen the sessions in the last snapshot' \
+            'cs -r           reopen the previous server\'s sessions here' \
             'cs -r <name>    reopen only the matching ones' \
             'cs --colours    show the status colours'
         return 0
@@ -192,16 +192,11 @@ function __cs_jump
     tmux select-pane -t $f[10]
 end
 
-# Backs `cs -r`. Sessions still running are filtered out, so this is safe to rerun.
-function __cs_restore -d "Reopen the sessions in the last snapshot"
+# Backs `cs -r`. Live sessions are filtered out, so .prev runs dry as they come
+# back up and the search falls through to this server's own snapshot.
+function __cs_restore -d "Reopen the previous server's sessions"
     set -l snapshot $argv[1]
     set -e argv[1]
-
-    test -s $snapshot
-    or begin
-        echo "cs: no snapshot at $snapshot" >&2
-        return 1
-    end
 
     set -l live
     for row in (claude-sessions)
@@ -209,15 +204,22 @@ function __cs_restore -d "Reopen the sessions in the last snapshot"
     end
 
     set -l rows
-    for row in (cat $snapshot)
-        set -l f (string split \t -- $row)
-        contains -- $f[1] $live
-        and continue
-        if set -q argv[1]
-            string match -qi -- "*$argv[1]*" "$f[9] $f[2] $f[3]"
-            or continue
+    for file in $snapshot.prev $snapshot
+        test -s $file
+        or continue
+        set rows
+        for row in (cat $file)
+            set -l f (string split \t -- $row)
+            contains -- $f[1] $live
+            and continue
+            if set -q argv[1]
+                string match -qi -- "*$argv[1]*" "$f[9] $f[2] $f[3]"
+                or continue
+            end
+            set -a rows $row
         end
-        set -a rows $row
+        set -q rows[1]
+        and break
     end
 
     if not set -q rows[1]
@@ -234,11 +236,22 @@ function __cs_restore -d "Reopen the sessions in the last snapshot"
     __cs_open $rows
 end
 
-# One window per window the snapshot recorded, one pane per session in it.
+# One window per window the snapshot recorded, one pane per session in it, in
+# the current tmux session or, from outside, the one the snapshot names.
 function __cs_open
+    set -l dest
+    set -l attach
+    set -l spare
+
     if not set -q TMUX
-        echo 'cs: reopening needs to run inside tmux' >&2
-        return 1
+        set attach (string split \t -- $argv[1])[6]
+        if not tmux has-session -t "=$attach" 2>/dev/null
+            tmux new-session -d -s $attach
+            or return 1
+            # The window a new session comes with is not one of ours.
+            set spare (tmux display-message -p -t "=$attach:" '#{window_id}')
+        end
+        set dest -t "$attach:"
     end
 
     set -l prev ""
@@ -254,7 +267,7 @@ function __cs_open
         end
 
         if test "$f[7]" != "$prev"
-            set pane (tmux new-window -P -F '#{pane_id}' -n $f[9] -c $f[2])
+            set pane (tmux new-window $dest -P -F '#{pane_id}' -n $f[9] -c $f[2])
             set prev $f[7]
         else
             set pane (tmux split-window -P -F '#{pane_id}' -t $pane -c $f[2])
@@ -268,4 +281,17 @@ function __cs_open
     end
 
     echo "reopened $opened session(s)"
+
+    if set -q spare[1]
+        if test $opened -gt 0
+            tmux kill-window -t $spare
+        else
+            # Nothing went in, so the session we made is not worth keeping.
+            tmux kill-session -t "=$attach"
+            set -e attach
+        end
+    end
+    if set -q attach[1]
+        tmux attach -t "=$attach"
+    end
 end

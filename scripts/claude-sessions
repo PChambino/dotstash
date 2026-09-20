@@ -18,8 +18,10 @@ save=0
 [ -d "$sessions" ] || exit 1
 
 # $TMUX is "<socket>,<pid>,<session>"; the socket identifies this server.
+# Outside tmux, ask a running server, so a detached one is still visible.
 socket=${TMUX:-}
 socket=${socket%%,*}
+[ -n "$socket" ] || socket=$(tmux display-message -p '#{socket_path}' 2>/dev/null)
 [ -n "$socket" ] || exit 1
 
 tab=$(printf '\t')
@@ -71,6 +73,18 @@ rows=$(
 
 # Written even when empty; the guards above caught the missing-listing cases.
 mkdir -p "$(dirname "$snapshot")" 2>/dev/null || exit 0
+
+# The socket is born with the server, so a snapshot older than it belongs to a
+# server that is gone: keep it as .prev. Empty ones are dropped, not promoted.
+born=$(stat -f %B "$socket" 2>/dev/null) || born=
+wrote=$(stat -f %m "$snapshot" 2>/dev/null) || wrote=
+if [ -n "$born" ] && [ -n "$wrote" ] && [ "$wrote" -lt "$born" ]; then
+    if [ -s "$snapshot" ]; then
+        mv -f "$snapshot" "$snapshot.prev" 2>/dev/null
+    else
+        rm -f "$snapshot"
+    fi
+fi
 tmp=$snapshot.$$
 if [ -n "$rows" ]; then
     printf '%s\n' "$rows" > "$tmp" 2>/dev/null || { rm -f "$tmp"; exit 0; }

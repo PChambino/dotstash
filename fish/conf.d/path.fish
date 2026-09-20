@@ -35,6 +35,7 @@ end
 
 if [ -e ~/Code/carwow/dev-environment ]
   addtopath ~/Code/carwow/dev-environment/bin
+  set -p fish_complete_path ~/Code/carwow/dev-environment/completions
 end
 
 addtopath ~/.local/bin

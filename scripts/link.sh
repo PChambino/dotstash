@@ -10,3 +10,4 @@ link_file `pwd`/claude-sessions ~/.local/bin/claude-sessions
 link_file `pwd`/claude-statusline ~/.local/bin/claude-statusline
 link_file `pwd`/claude-usage ~/.local/bin/claude-usage
 link_file `pwd`/tmux-claude-status ~/.local/bin/tmux-claude-status
+link_file `pwd`/imgcat ~/.local/bin/imgcat

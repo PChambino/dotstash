@@ -1,0 +1,139 @@
+#!/bin/sh
+# Show images in the terminal, with the kitty graphics protocol.
+#
+#   imgcat [-w cols] [-r rows] [-n] file...
+#   imgcat -c
+#
+#   -w, --width cols  scale to this many cells wide
+#   -r, --rows rows   scale to this many cells tall
+#   -n, --native      no scaling: one image pixel per screen pixel
+#   -c, --clear       wipe the images the terminal is still drawing
+#
+# Needs a terminal that speaks the protocol (ghostty, kitty, wezterm). Inside
+# tmux the escape goes through untouched, which tmux only permits per pane and
+# only while the pane is visible; it never sees the image, so we also reserve
+# the rows it covers by hand.
+
+set -u
+
+ESC=$(printf '\033')
+
+usage() { sed -n '2,10p' "$0" | cut -c3-; }
+
+# tmux redraws the text under an image without the terminal ever hearing about
+# it, so a stale image can outlive the window it was shown in. d=a drops every
+# placement on the visible screen, keeping the image data the terminal stores.
+clear_images() {
+    if [ -n "${TMUX:-}" ]; then
+        printf '%sPtmux;%s%s_Ga=d,d=a%s%s\\%s\\' "$ESC" "$ESC" "$ESC" "$ESC" "$ESC" "$ESC"
+    else
+        printf '%s_Ga=d,d=a%s\\' "$ESC" "$ESC"
+    fi
+}
+
+cols='' rows='' native=false clear=false
+while [ $# -gt 0 ]; do
+    case $1 in
+        -w|--width)  cols=${2:-}; shift 2 ;;
+        -r|--rows)   rows=${2:-}; shift 2 ;;
+        -n|--native) native=true; shift ;;
+        -c|--clear)  clear=true; shift ;;
+        -h|--help)   usage; exit 0 ;;
+        --)          shift; break ;;
+        -?*)         echo "imgcat: unknown option $1" >&2; exit 2 ;;
+        *)           break ;;
+    esac
+done
+
+[ -n "${TMUX:-}" ] && tmux set -p allow-passthrough on 2>/dev/null
+
+$clear && { clear_images; [ $# -gt 0 ] || exit 0; }
+[ $# -gt 0 ] || { usage >&2; exit 2; }
+
+term_cols=$(tput cols 2>/dev/null) || term_cols=80
+
+# ws_xpixel/ws_ypixel -- which tmux forwards from its client -- give the cell
+# size, and so the natural size of an image in cells. Without them we can only
+# fit to the pane width.
+cell=$(python3 - 2>/dev/null <<'PY'
+import fcntl, struct, termios
+with open('/dev/tty') as tty:
+    rows, cols, x, y = struct.unpack('HHHH', fcntl.ioctl(tty, termios.TIOCGWINSZ, b'\0' * 8))
+print(x // cols if cols and x else 0, y // rows if rows and y else 0)
+PY
+) || cell=''
+cell_w=${cell% *} cell_h=${cell#* }
+[ "${cell_w:-0}" -gt 0 ] 2>/dev/null || { cell_w=0; cell_h=0; }
+
+tmp=${TMPDIR:-/tmp}/imgcat.$$.png
+trap 'rm -f "$tmp"' EXIT INT TERM
+
+dimension() { sips -g "$2" "$1" 2>/dev/null | awk -v k="$2:" '$1 == k { print $2 }'; }
+
+show() {
+    file=$1
+    [ -f "$file" ] || { echo "imgcat: no such file: $file" >&2; return 1; }
+
+    case $(sips -g format "$file" 2>/dev/null) in
+        *"format: png"*) png=$file ;;
+        *)               png=$tmp
+                         sips -s format png "$file" --out "$tmp" >/dev/null 2>&1 ||
+                             { echo "imgcat: not an image: $file" >&2; return 1; } ;;
+    esac
+
+    img_w=$(dimension "$png" pixelWidth) img_h=$(dimension "$png" pixelHeight)
+    c=$cols r=$rows
+    if ! $native && [ -z "$c" ] && [ -z "$r" ]; then
+        c=$term_cols
+        if [ "$cell_w" -gt 0 ] && [ -n "$img_w" ]; then
+            natural=$(( (img_w + cell_w - 1) / cell_w ))
+            [ "$natural" -lt "$term_cols" ] && c=$natural
+        fi
+    fi
+
+    geom=''
+    [ -n "$c" ] && geom="$geom,c=$c"
+    [ -n "$r" ] && geom="$geom,r=$r"
+
+    # Rows to reserve under tmux: what the terminal will scale the image to.
+    reserve=0
+    if [ -n "${TMUX:-}" ]; then
+        if [ -n "$r" ]; then
+            reserve=$r
+        elif [ "$cell_h" -gt 0 ] && [ -n "$img_w" ] && [ "$img_w" -gt 0 ]; then
+            drawn_h=$(( img_h * c * cell_w / img_w ))
+            reserve=$(( (drawn_h + cell_h - 1) / cell_h ))
+        fi
+    fi
+
+    if [ "$reserve" -gt 0 ]; then
+        i=0
+        while [ $i -lt "$reserve" ]; do printf '\n'; i=$((i + 1)); done
+        printf '%s[%dA' "$ESC" "$reserve"
+    fi
+
+    base64 < "$png" | tr -d '\n' | fold -w 4096 | awk \
+        -v e="$ESC" -v geom="$geom" -v tmux="${TMUX:-}" '
+        function emit(chunk, more,   seq) {
+            seq = e "_G" (n++ ? "" : "a=T,f=100,q=2" geom ",") "m=" more ";" chunk e "\\"
+            if (tmux != "") {
+                gsub(e, e e, seq)
+                seq = e "Ptmux;" seq e "\\"
+            }
+            printf "%s", seq
+        }
+        { if (buf != "") emit(buf, 1); buf = $0 }
+        END { if (buf != "") emit(buf, 0) }'
+
+    if [ "$reserve" -gt 0 ]; then
+        printf '%s[%dB\r' "$ESC" "$reserve"
+    else
+        printf '\n'
+    fi
+}
+
+status=0
+for file in "$@"; do
+    show "$file" || status=1
+done
+exit $status

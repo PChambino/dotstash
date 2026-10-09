@@ -203,8 +203,19 @@ function __cs_restore -d "Reopen the previous server's sessions"
         set -a live (string split \t -- $row)[1]
     end
 
+    # Until this server snapshots, the snapshot is the previous server's.
+    set -l files $snapshot.prev $snapshot
+    set -l socket (tmux display-message -p '#{socket_path}' 2>/dev/null)
+    set -l born
+    set -q socket[1]
+    and set born (stat -f %B $socket 2>/dev/null)
+    set -l wrote (stat -f %m $snapshot 2>/dev/null)
+    if not set -q born[1]; or test "$wrote" -lt "$born" 2>/dev/null
+        set files $snapshot
+    end
+
     set -l rows
-    for file in $snapshot.prev $snapshot
+    for file in $files
         test -s $file
         or continue
         set rows

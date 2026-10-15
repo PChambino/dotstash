@@ -53,10 +53,17 @@ if [ -n "$limits" ]; then
     fi
 fi
 
-# The live cwd, worktree included, for tmux.conf's splits; the process's own
-# cwd stays wherever claude was launched.
-[ -n "${TMUX_PANE:-}" ] && [ -n "$cwd" ] &&
-    tmux set -p -t "$TMUX_PANE" @claude_cwd "$cwd" 2>/dev/null
+# The live cwd, worktree included, for tmux-claude-cwd; the process's own cwd
+# stays wherever claude was launched. The pid tells it whether claude still runs.
+if [ -n "${TMUX_PANE:-}" ] && [ -n "$cwd" ]; then
+    pid=$PPID
+    while [ "${pid:-1}" -gt 1 ] && [ "$(ps -o comm= -p "$pid")" != claude ]; do
+        pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+    done
+    [ "${pid:-1}" -gt 1 ] &&
+        tmux set -p -t "$TMUX_PANE" @claude_pid "$pid" \; \
+             set -p -t "$TMUX_PANE" @claude_cwd "$cwd" 2>/dev/null
+fi
 
 # The repo name beats basename $cwd, which is whatever subdirectory we're in.
 name=${repo:-$(basename "$cwd")}

@@ -1,0 +1,17 @@
+#!/bin/sh
+# The directory a new pane split from the given one should open in: the Claude
+# session's cwd while it runs there (set by claude-statusline), else the pane's.
+
+pane=${1:?usage: tmux-claude-cwd <pane_id>}
+sep=$(printf '\037')
+
+IFS="$sep" read -r pid cwd path <<EOF
+$(tmux display -p -t "$pane" "#{@claude_pid}$sep#{@claude_cwd}$sep#{pane_current_path}")
+EOF
+
+if [ -n "$pid" ] && [ -d "$cwd" ] && [ "$(ps -o comm= -p "$pid" 2>/dev/null)" = claude ] &&
+    [ "$(tmux display -p -t "$pane" '#{pane_tty}')" = "/dev/$(ps -o tty= -p "$pid" | tr -d ' ')" ]; then
+    printf '%s\n' "$cwd"
+else
+    printf '%s\n' "$path"
+fi

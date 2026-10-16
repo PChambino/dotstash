@@ -125,4 +125,6 @@ fi
 
 [ -n "$five" ] && out="$out  $(printf '%s5h%s %.0f%%' "$green" "$off" "$five")"
 
+[ -n "${TMUX_PANE:-}" ] && out="$out  $esc[2m$TMUX_PANE$off"
+
 printf '%s\n' "$out"

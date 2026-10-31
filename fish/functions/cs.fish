@@ -127,33 +127,67 @@ function __cs_colours
         { printf "  %-19s %s%-12s%s SGR %s\n", $1, esc "[" $2 "m", $3, off, $2 }'
 end
 
-# Rows in, one padded and coloured line each. Every column is cut to fit, the
-# prompt taking whatever width is left over. The palette rides in ahead of the
-# rows as C records, awk -v not carrying the newlines it would otherwise need.
+# Rows in, one coloured line each: window, then repo/worktree and branch as the
+# Claude status line has them, then status and age. -s puts the tmux session
+# ahead of the window. The palette and each pane's live cwd ride in ahead of
+# the rows, awk -v not carrying the newlines they would otherwise need.
 function __cs_format
+    argparse s/session -- $argv
+    or return 1
+    set -l sess 0
+    set -q _flag_session
+    and set sess 1
+
     begin
         __cs_palette | awk '{print "C\t" $1 "\t" $2 "\t" $3}'
+        tmux list-panes -a -F "W	#{pane_id}	#{@claude_cwd}" 2>/dev/null
         cat
-    end | awk -F\t -v now=(date +%s) -v cols=$COLUMNS '
+    end | awk -F\t -v now=(date +%s) -v cols=$COLUMNS -v sess=$sess '
         function fit(s, n) {
             return length(s) > n ? substr(s, 1, n - 1) "…" : s
         }
         BEGIN {
             esc = sprintf("%c", 27); off = esc "[0m"
+            dim = esc "[2m"; cyan = esc "[36m"; blue = esc "[34m"; red = esc "[31m"
             # COLUMNS is unset when fish is not interactive.
-            room = (cols > 0 ? cols : 120) - 86
+            room = (cols > 0 ? cols : 120) - 45 - (sess ? 10 : 0)
+            if (room > 50) room = 50
+            if (room < 20) room = 20
         }
 
         $1 == "C" { c[$2] = esc "[" $3 "m"; label[$2] = $4; next }
+        $1 == "W" { live[$2] = $3; next }
 
         {
             path = $2; branch = $3; state = $4; act = $5
-            widx = $8; wname = $9; prompt = $11
+            tsess = $6; widx = $8; wname = $9; pane = $10
 
-            project = path; sub(/.*\//, "", project)
-            # A window is usually named after its project or its branch.
-            if (project == wname) project = ""
-            if (branch == wname) branch = ""
+            # The live cwd follows Claude into a worktree; a recycled pane id
+            # from another server would not sit under the same path.
+            cwd = path
+            if (pane in live && index(live[pane] "/", path "/") == 1) cwd = live[pane]
+
+            wt = ""
+            if (match(cwd, /\/\.worktrees\/[^\/]+/)) {
+                wt = substr(cwd, RSTART + 12, RLENGTH - 12)
+                cwd = substr(cwd, 1, RSTART - 1)
+            }
+            name = cwd; sub(/.*\//, "", name)
+            if (wt != "") name = name "/" wt
+            # The worktree is usually named after its branch, so it stands in.
+            if (wt != "" || branch == "unknown") branch = ""
+
+            plain = name (branch == "" ? "" : " git:(" branch ")")
+            if (length(plain) > room) {
+                if (branch != "" && room - length(name) - 7 >= 4)
+                    branch = fit(branch, room - length(name) - 7)
+                else {
+                    branch = ""; name = fit(name, room)
+                }
+                plain = name (branch == "" ? "" : " git:(" branch ")")
+            }
+            repo = cyan name off (branch == "" ? "" : " " blue "git:(" red branch blue ")" off)
+            pad = sprintf("%" (room - length(plain) + 1) "s", "")
 
             secs = now - act
             if (act == 0)          age = "-"
@@ -164,10 +198,10 @@ function __cs_format
             if (!(state in c)) c[state] = c["idle"]
             shown = (state in label) ? label[state] : state
 
-            printf "%-24s %-16s %-26s %s%-10s%s %4s  %s\n",
-                fit(widx ":" wname, 24), fit(project, 16), fit(branch, 26),
-                c[state], fit(shown, 10), off, age,
-                (room < 8 ? "" : fit(prompt, room))
+            printf "%s%-22s %s%s%s%-10s%s %4s\n",
+                (sess ? dim sprintf("%-10s", fit(tsess, 9)) off : ""),
+                fit(widx ":" wname, 22), repo, pad,
+                c[state], fit(shown, 10), off, age
         }'
 end
 
@@ -190,10 +224,16 @@ function __cs_list
     end
 end
 
+# Freshest first, the tmux session ahead of each row once there is more than one.
 function __cs_pick
-    set -l display (printf '%s\n' $argv | __cs_format)
+    set -l rows (printf '%s\n' $argv | sort -t\t -k5,5rn)
+    set -l opt
+    test (printf '%s\n' $rows | cut -f6 | sort -u | count) -gt 1
+    and set opt -s
+
+    set -l display (printf '%s\n' $rows | __cs_format $opt)
     set -l lines
-    for i in (seq (count $argv))
+    for i in (seq (count $rows))
         set -a lines (printf '%s\t%s' $i $display[$i])
     end
 
@@ -201,7 +241,7 @@ function __cs_pick
         | fzf --delimiter=\t --with-nth=2 --ansi --prompt='claude> ')
     test -n "$sel"
     or return 1
-    echo $argv[(string split \t -- $sel)[1]]
+    echo $rows[(string split \t -- $sel)[1]]
 end
 
 function __cs_jump

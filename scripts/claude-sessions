@@ -33,7 +33,7 @@ rows=$(
         ps -eo pid= | awk -v t="$tab" '{print "L" t $1}'
         # -mmin prunes hundreds of dead sessions. -exec {} + rather than xargs,
         # which with no matches would run jq argumentless and hang on stdin.
-        find "$sessions" -name '*.json' -mmin -10080 -exec jq -r --arg sock "$socket" '
+        find "$sessions" -name '*.json' -mmin -43200 -exec jq -r --arg sock "$socket" '
             select(.terminal.multiplexer.name? == "tmux")
             | select(.terminal.multiplexer.socket == $sock)
             | select(.ended_at == null and .disconnected_at == null)

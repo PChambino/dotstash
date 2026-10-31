@@ -12,7 +12,7 @@ function cs -d "list, jump to, or reopen Claude sessions"
             'cs <name>       jump to the pane running the matching session' \
             'cs -p           pick a session with fzf, and jump to it' \
             'cs -p <name>    pick among the matching ones' \
-            'cs -r           reopen the previous server\'s sessions here' \
+            'cs -r           reopen the previous server\'s sessions' \
             'cs -r <name>    reopen only the matching ones' \
             'cs --colours    show the status colours'
         return 0
@@ -61,7 +61,7 @@ function cs -d "list, jump to, or reopen Claude sessions"
     end
 
     if not set -q argv[1]
-        printf '%s\n' $rows | __cs_format
+        __cs_list $rows
         return 0
     end
 
@@ -171,6 +171,25 @@ function __cs_format
         }'
 end
 
+# __cs_format, under a heading per tmux session once there is more than one.
+function __cs_list
+    set -l names (printf '%s\n' $argv | cut -f6 | awk '!seen[$0]++')
+    if not set -q names[2]
+        printf '%s\n' $argv | __cs_format
+        return
+    end
+
+    for name in $names
+        test "$name" = "$names[1]"
+        or echo
+        printf '\e[1m%s\e[0m\n' $name
+        for row in $argv
+            test (string split \t -- $row)[6] = "$name"
+            and echo $row
+        end | __cs_format
+    end
+end
+
 function __cs_pick
     set -l display (printf '%s\n' $argv | __cs_format)
     set -l lines
@@ -238,7 +257,7 @@ function __cs_restore -d "Reopen the previous server's sessions"
         return 0
     end
 
-    printf '%s\n' $rows | __cs_format
+    __cs_list $rows
     read -l -P "reopen "(count $rows)" session(s)? [y/N] " reply
     or return 1
     string match -qr '^[yY]' -- $reply
@@ -247,29 +266,18 @@ function __cs_restore -d "Reopen the previous server's sessions"
     __cs_open $rows
 end
 
-# One window per window the snapshot recorded, one pane per session in it, in
-# the current tmux session or, from outside, the one the snapshot names.
+# Each tmux session the snapshot recorded is reused if running, else recreated;
+# one window per recorded window, one pane per Claude session in it.
 function __cs_open
-    set -l dest
-    set -l attach
-    set -l spare
+    # Grouped by tmux session, keeping the window and pane order within each.
+    set -l rows (printf '%s\n' $argv | sort -s -t\t -k6,6)
 
-    if not set -q TMUX
-        set attach (string split \t -- $argv[1])[6]
-        if not tmux has-session -t "=$attach" 2>/dev/null
-            tmux new-session -d -s $attach
-            or return 1
-            # The window a new session comes with is not one of ours.
-            set spare (tmux display-message -p -t "=$attach:" '#{window_id}')
-        end
-        set dest -t "$attach:"
-    end
-
+    set -l names
     set -l prev ""
     set -l pane ""
     set -l opened 0
 
-    for row in $argv
+    for row in $rows
         set -l f (string split \t -- $row)
 
         if not test -d "$f[2]"
@@ -277,13 +285,27 @@ function __cs_open
             continue
         end
 
+        set -l spare
+        if not contains -- $f[6] $names
+            set -a names $f[6]
+            if not tmux has-session -t "=$f[6]" 2>/dev/null
+                tmux new-session -d -s $f[6]
+                or return 1
+                # The window a new session comes with is not one of ours.
+                set spare (tmux display-message -p -t "=$f[6]:" '#{window_id}')
+            end
+        end
+
         if test "$f[7]" != "$prev"
-            set pane (tmux new-window $dest -P -F '#{pane_id}' -n $f[9] -c $f[2])
+            set pane (tmux new-window -t "=$f[6]:" -P -F '#{pane_id}' -n $f[9] -c $f[2])
             set prev $f[7]
         else
             set pane (tmux split-window -P -F '#{pane_id}' -t $pane -c $f[2])
             tmux select-layout -t $pane tiled >/dev/null
         end
+
+        set -q spare[1]
+        and tmux kill-window -t $spare
 
         # send-keys, not `claude` as the pane's command: quitting it would
         # otherwise take the pane down too.
@@ -291,18 +313,9 @@ function __cs_open
         set opened (math $opened + 1)
     end
 
-    echo "reopened $opened session(s)"
+    echo "reopened $opened session(s) in "(string join ', ' $names)
 
-    if set -q spare[1]
-        if test $opened -gt 0
-            tmux kill-window -t $spare
-        else
-            # Nothing went in, so the session we made is not worth keeping.
-            tmux kill-session -t "=$attach"
-            set -e attach
-        end
-    end
-    if set -q attach[1]
-        tmux attach -t "=$attach"
+    if not set -q TMUX; and set -q names[1]
+        tmux attach -t "=$names[1]"
     end
 end

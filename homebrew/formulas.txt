@@ -13,6 +13,7 @@ git
 gnu-sed
 gnupg
 go
+hammerspoon
 htop
 httpie
 hub

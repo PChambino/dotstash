@@ -5,3 +5,4 @@ cd `dirname $0`
 
 mkdir -p ~/.config/ghostty
 link_file `pwd`/config ~/.config/ghostty/config
+link_file `pwd`/themes ~/.config/ghostty/themes

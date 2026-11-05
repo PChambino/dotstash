@@ -3,40 +3,29 @@ if [ -e /opt/homebrew/bin/brew ]
   set -gx HOMEBREW_PREFIX /opt/homebrew
   set -gx HOMEBREW_CELLAR /opt/homebrew/Cellar
   set -gx HOMEBREW_REPOSITORY /opt/homebrew
-  addtopath /opt/homebrew/bin /opt/homebrew/sbin
+  fish_add_path -g /opt/homebrew/bin /opt/homebrew/sbin
   set -gp MANPATH /opt/homebrew/share/man
   set -gp INFOPATH /opt/homebrew/share/info
 end
 
-if [ -e /Applications/SnowflakeCLI.app ]
-  addtopath /Applications/SnowflakeCLI.app/Contents/MacOS
-end
-
-if [ -e /opt/homebrew/opt/openjdk ]
-  addtopath /opt/homebrew/opt/openjdk/bin
-end
-
-if [ -e ~/.google-cloud-sdk ]
-  addtopath ~/.google-cloud-sdk/bin
-end
-
-if [ -e ~/go/bin ]
-  addtopath ~/go/bin
-end
-
 if [ -e /opt/homebrew/opt/ruby/bin ]
-  addtopath /opt/homebrew/opt/ruby/bin
-  addtopath (gem env home)/bin
+  fish_add_path -g /opt/homebrew/opt/ruby/bin
+  fish_add_path -g (gem env home)/bin
 end
 
 if [ (which ry) = /opt/homebrew/bin/ry ]
-  addtopath /opt/homebrew/lib/ry/current/bin
+  fish_add_path -g /opt/homebrew/lib/ry/current/bin
 end
 
+fish_add_path -g /opt/homebrew/opt/openjdk/bin
+fish_add_path -g ~/.capsem/bin
+fish_add_path -g ~/.google-cloud-sdk/bin
+fish_add_path -g ~/.local/bin
+fish_add_path -g ~/go/bin
+
 if [ -e ~/Code/carwow/dev-environment ]
-  addtopath ~/Code/carwow/dev-environment/bin
+  fish_add_path -g ~/Code/carwow/dev-environment/bin
   set -p fish_complete_path ~/Code/carwow/dev-environment/completions
 end
 
-addtopath ~/.local/bin
-addtopath bin
+set -gp fish_user_paths bin

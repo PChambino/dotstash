@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+// Drive Dia over CDP. Needs chrome://inspect/#remote-debugging enabled in Dia.
+// Dia asks to allow each connection, so `dia serve` holds one open behind a socket.
+import { spawn } from 'node:child_process'
+import fs from 'node:fs'
+import net from 'node:net'
+import os from 'node:os'
+
+const usage = `usage: dia list
+       dia activate <match>
+       dia open <url>
+       dia eval <match> <js>
+       dia stop
+
+<match> is a tab id prefix, or text in its url or title`
+
+const sock = `${os.tmpdir()}/dia-cdp.sock`
+const portFile = `${os.homedir()}/Library/Application Support/Dia/User Data/DevToolsActivePort`
+
+async function serve() {
+  const [port, path] = fs.readFileSync(portFile, 'utf8').trim().split('\n')
+  const ws = new WebSocket(`ws://127.0.0.1:${port}${path}`)
+  const pending = new Map()
+  let nextId = 0
+  const send = (method, params = {}, sessionId) =>
+    new Promise((resolve, reject) => {
+      const id = ++nextId
+      pending.set(id, { resolve, reject })
+      ws.send(JSON.stringify({ id, method, params, sessionId }))
+    })
+  ws.onmessage = ({ data }) => {
+    const msg = JSON.parse(data)
+    const p = pending.get(msg.id)
+    if (!p) return
+    pending.delete(msg.id)
+    msg.error ? p.reject(new Error(msg.error.message)) : p.resolve(msg.result)
+  }
+  await new Promise((resolve, reject) => {
+    ws.onopen = resolve
+    ws.onerror = reject
+  })
+
+  const pages = async () => (await send('Target.getTargets')).targetInfos.filter(t => t.type === 'page')
+  const find = async match => {
+    const all = await pages()
+    const m = match.toLowerCase()
+    const tab =
+      all.find(t => t.targetId.toLowerCase().startsWith(m)) ??
+      all.find(t => t.url.toLowerCase().includes(m) || t.title.toLowerCase().includes(m))
+    if (!tab) throw new Error(`no tab matching ${match}`)
+    return tab
+  }
+
+  const commands = {
+    async list() {
+      return (await pages()).map(t => `${t.targetId.slice(0, 8)}\t${t.title}\t${t.url}`).join('\n')
+    },
+    async activate(match) {
+      const tab = await find(match)
+      await send('Target.activateTarget', { targetId: tab.targetId })
+      return tab.title
+    },
+    async open(url) {
+      const { targetId } = await send('Target.createTarget', { url })
+      return targetId.slice(0, 8)
+    },
+    async eval(match, ...js) {
+      const tab = await find(match)
+      const { sessionId } = await send('Target.attachToTarget', { targetId: tab.targetId, flatten: true })
+      try {
+        const { result, exceptionDetails } = await send(
+          'Runtime.evaluate',
+          { expression: js.join(' '), returnByValue: true, awaitPromise: true },
+          sessionId,
+        )
+        if (exceptionDetails) throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text)
+        return typeof result.value === 'string' ? result.value : JSON.stringify(result.value, null, 2)
+      } finally {
+        await send('Target.detachFromTarget', { sessionId }).catch(() => {})
+      }
+    },
+    async stop() {
+      setImmediate(quit)
+      return ''
+    },
+  }
+
+  const server = net.createServer(conn => {
+    let buf = ''
+    conn.on('data', async chunk => {
+      buf += chunk
+      if (!buf.includes('\n')) return
+      const { cmd, args } = JSON.parse(buf)
+      try {
+        conn.end(JSON.stringify({ out: await commands[cmd](...args) }) + '\n')
+      } catch (err) {
+        conn.end(JSON.stringify({ err: err.message }) + '\n')
+      }
+    })
+  })
+  const quit = () => {
+    server.close()
+    fs.rmSync(sock, { force: true })
+    process.exit(0)
+  }
+  ws.onclose = quit
+  process.on('SIGTERM', quit)
+  server.listen(sock, () => fs.chmodSync(sock, 0o600))
+}
+
+const request = (cmd, args) =>
+  new Promise((resolve, reject) => {
+    const conn = net.connect(sock)
+    let buf = ''
+    conn.on('connect', () => conn.write(JSON.stringify({ cmd, args }) + '\n'))
+    conn.on('data', chunk => (buf += chunk))
+    conn.on('end', () => resolve(JSON.parse(buf)))
+    conn.on('error', reject)
+  })
+
+async function client(cmd, args) {
+  try {
+    return await request(cmd, args)
+  } catch (err) {
+    if (!['ENOENT', 'ECONNREFUSED'].includes(err.code)) throw err
+  }
+  if (cmd === 'stop') return { out: '' }
+  if (!fs.existsSync(portFile)) throw new Error('remote debugging is off, enable it at chrome://inspect/#remote-debugging')
+  fs.rmSync(sock, { force: true })
+  spawn(process.execPath, [process.argv[1], 'serve'], { detached: true, stdio: 'ignore' }).unref()
+  console.error('dia: allow the connection in Dia')
+  for (const deadline = Date.now() + 60_000; Date.now() < deadline; ) {
+    await new Promise(r => setTimeout(r, 250))
+    try {
+      return await request(cmd, args)
+    } catch {}
+  }
+  throw new Error('no connection to Dia, was it allowed?')
+}
+
+const [cmd, ...args] = process.argv.slice(2)
+if (cmd === 'serve') {
+  await serve()
+} else {
+  const need = { list: 0, activate: 1, open: 1, eval: 2, stop: 0 }[cmd]
+  if (need === undefined || args.length < need) {
+    console.error(usage)
+    process.exit(2)
+  }
+  try {
+    const { out, err } = await client(cmd, args)
+    if (err) throw new Error(err)
+    if (out) console.log(out)
+  } catch (err) {
+    console.error(`dia: ${err.message}`)
+    process.exitCode = 1
+  }
+}

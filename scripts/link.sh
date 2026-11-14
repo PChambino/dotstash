@@ -13,3 +13,4 @@ link_file `pwd`/tmux-claude-status ~/.local/bin/tmux-claude-status
 link_file `pwd`/tmux-claude-cwd ~/.local/bin/tmux-claude-cwd
 link_file `pwd`/imgcat ~/.local/bin/imgcat
 link_file `pwd`/dia ~/.local/bin/dia
+link_file `pwd`/dia-cdp ~/.local/bin/dia-cdp

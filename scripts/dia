@@ -4,6 +4,7 @@
 const usage = `usage: dia [-p <profile>] list
        dia [-p <profile>] activate <match>
        dia [-p <profile>] open <url>
+       dia [-p <profile>] go <match> <url>
        dia [-p <profile>] eval <match> <js>
 
 <match> is a tab id prefix, or text in its url or title
@@ -29,7 +30,7 @@ function main(argv) {
     argv = argv.slice(2)
   }
   const [cmd, ...args] = argv
-  const need = { list: 0, activate: 1, open: 1, eval: 2 }[cmd]
+  const need = { list: 0, activate: 1, open: 1, go: 2, eval: 2 }[cmd]
   if (need === undefined || args.length < need) throw new Error(usage)
 
   const dia = Application('Dia')
@@ -68,12 +69,17 @@ function main(argv) {
     dia.focus(t.profile.tabs[t.i])
     return t.title
   }
+  const withScheme = url => (/^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`)
   if (cmd === 'open') {
-    const url = /^[a-z][a-z0-9+.-]*:/i.test(args[0]) ? args[0] : `https://${args[0]}`
     const profile = profileName ? profiles()[0] : win.activeProfile
-    const tab = dia.Tab({ url })
+    const tab = dia.Tab({ url: withScheme(args[0]) })
     profile.tabs.push(tab)
     return tab.id().slice(0, 8)
+  }
+  if (cmd === 'go') {
+    const t = find(args[0])
+    t.profile.tabs[t.i].url = withScheme(args[1])
+    return t.id.slice(0, 8)
   }
   // AppleScript's `execute` needs a Dia launch flag; CDP's toggle survives restarts.
   if (cmd === 'eval') {
